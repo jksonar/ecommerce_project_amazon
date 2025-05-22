@@ -12,7 +12,7 @@ def register(request):
             user = form.save()
             login(request, user)
             messages.success(request, 'Registration successful!')
-            return redirect('home')
+            return redirect('dashboard:home')
     else:
         form = UserRegistrationForm()
     return render(request, 'accounts/register.html', {'form': form})
@@ -27,7 +27,7 @@ def login_view(request):
             if user is not None:
                 login(request, user)
                 messages.success(request, 'Login successful!')
-                return redirect('home')
+                return redirect('dashboard:home')
         else:
             messages.error(request, 'Invalid email or password.')
     else:
@@ -37,7 +37,7 @@ def login_view(request):
 def logout_view(request):
     logout(request)
     messages.success(request, 'You have been logged out.')
-    return redirect('home')
+    return redirect('dashboard:home')
 
 @login_required
 def profile(request):

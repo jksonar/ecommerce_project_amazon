@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block title %}Access Denied | Amazon-like{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h4 class="mb-0">Access Denied</h4>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-exclamation-triangle text-danger fa-4x"></i>
+                    </div>
+                    <h5 class="card-title text-center">Permission Error</h5>
+                    <p class="card-text text-center">You do not have permission to access the dashboard. This area is restricted to staff members only.</p>
+                    
+                    {% if messages %}
+                    <div class="alert alert-danger">
+                        {% for message in messages %}
+                            {{ message }}
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    
+                    <div class="text-center mt-4">
+                        <a href="{% url 'products:home' %}" class="btn btn-primary">Return to Homepage</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

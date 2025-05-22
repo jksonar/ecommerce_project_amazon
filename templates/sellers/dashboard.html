@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+
+{% block title %}Seller Dashboard | Amazon-like{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <h2 class="mb-4">Seller Dashboard</h2>
+    
+    <div class="row">
+        <div class="col-md-3 mb-4">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Navigation</h5>
+                </div>
+                <div class="list-group list-group-flush">
+                    <a href="#" class="list-group-item list-group-item-action active">Dashboard</a>
+                    <a href="#" class="list-group-item list-group-item-action">Products</a>
+                    <a href="#" class="list-group-item list-group-item-action">Orders</a>
+                    <a href="#" class="list-group-item list-group-item-action">Reviews</a>
+                    <a href="#" class="list-group-item list-group-item-action">Settings</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-9">
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i> This feature will be implemented in Phase 5.
+            </div>
+            
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Dashboard Overview</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <div class="card bg-primary text-white">
+                                <div class="card-body text-center">
+                                    <h6 class="card-title">Products</h6>
+                                    <h2 class="mb-0">0</h2>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="card bg-success text-white">
+                                <div class="card-body text-center">
+                                    <h6 class="card-title">Orders</h6>
+                                    <h2 class="mb-0">0</h2>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="card bg-info text-white">
+                                <div class="card-body text-center">
+                                    <h6 class="card-title">Revenue</h6>
+                                    <h2 class="mb-0">$0</h2>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Recent Orders</h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-center text-muted py-3">No orders yet.</p>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Top Products</h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-center text-muted py-3">No products yet.</p>
+                    <div class="text-center">
+                        <a href="#" class="btn btn-primary">Add New Product</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
