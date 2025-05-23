@@ -4,6 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from .forms import UserRegistrationForm, UserLoginForm, UserProfileForm, AddressForm
 from .models import Address
+from orders.models import Order
 
 def register(request):
     if request.method == 'POST':
@@ -116,3 +117,10 @@ def set_default_address(request, pk):
     
     messages.success(request, 'Default address updated successfully!')
     return redirect('accounts:address_list')
+
+
+# Add this new view function
+@login_required
+def user_orders(request):
+    orders = Order.objects.filter(user=request.user).order_by('-created_at')
+    return render(request, 'accounts/orders.html', {'orders': orders})

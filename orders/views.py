@@ -1,8 +1,9 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.http import Http404
 from products.models import Product
-from .models import Cart, CartItem
+from .models import Cart, CartItem, Order
 from decimal import Decimal
 
 @login_required
@@ -70,4 +71,31 @@ def update_cart(request, item_id):
         messages.success(request, 'Item removed from cart.')
     
     return redirect('orders:cart')
+
+@login_required
+def order_confirmation(request, order_id):
+    try:
+        order = Order.objects.get(id=order_id, user=request.user)
+        return render(request, 'orders/order_confirmation.html', {'order': order})
+    except Order.DoesNotExist:
+        raise Http404("Order not found")
+
+@login_required
+def order_detail(request, order_id):
+    try:
+        order = Order.objects.get(id=order_id, user=request.user)
+        
+        # Calculate subtotal and tax
+        subtotal = sum(item.total_price for item in order.items.all())
+        tax = order.total_amount - subtotal
+        
+        context = {
+            'order': order,
+            'subtotal': subtotal,
+            'tax': tax,
+        }
+        
+        return render(request, 'orders/order_detail.html', context)
+    except Order.DoesNotExist:
+        raise Http404("Order not found")
 # Create your views here.

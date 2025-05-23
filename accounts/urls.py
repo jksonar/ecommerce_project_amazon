@@ -13,4 +13,5 @@ urlpatterns = [
     path('addresses/<int:pk>/edit/', views.edit_address, name='edit_address'),
     path('addresses/<int:pk>/delete/', views.delete_address, name='delete_address'),
     path('addresses/<int:pk>/default/', views.set_default_address, name='set_default_address'),
+    path('orders/', views.user_orders, name='orders'),
 ]

@@ -5,21 +5,7 @@
 {% block content %}
 <div class="container py-5">
     <div class="row">
-        <div class="col-md-3">
-            <div class="card mb-4">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0">Account Navigation</h5>
-                </div>
-                <div class="list-group list-group-flush">
-                    <a href="{% url 'accounts:profile' %}" class="list-group-item list-group-item-action">My Profile</a>
-                    <a href="{% url 'accounts:address_list' %}" class="list-group-item list-group-item-action">My Addresses</a>
-                    <a href="{% url 'orders:order_history' %}" class="list-group-item list-group-item-action active">My Orders</a>
-                    <a href="#" class="list-group-item list-group-item-action">My Reviews</a>
-                </div>
-            </div>
-        </div>
-        
-        <div class="col-md-9">
+        <div class="col-md-8">
             <div class="card mb-4">
                 <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
                     <h5 class="mb-0">Order #{{ order.id }}</h5>
@@ -28,29 +14,22 @@
                 <div class="card-body">
                     <div class="row mb-4">
                         <div class="col-md-6">
-                            <p><strong>Order Date:</strong> {{ order.created_at|date:"F j, Y" }}</p>
-                            <p><strong>Payment Status:</strong> 
+                            <h6>Order Date</h6>
+                            <p>{{ order.created_at|date:"F j, Y" }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Payment Status</h6>
+                            <p>
                                 {% if order.payment_status %}
                                     <span class="badge bg-success">Paid</span>
                                 {% else %}
                                     <span class="badge bg-warning text-dark">Pending</span>
                                 {% endif %}
                             </p>
-                            <p><strong>Payment Method:</strong> {{ order.payment.get_payment_method_display }}</p>
-                        </div>
-                        <div class="col-md-6">
-                            <p><strong>Shipping Address:</strong></p>
-                            <p class="mb-0">
-                                {{ order.address.street_address }}<br>
-                                {% if order.address.apartment_address %}{{ order.address.apartment_address }}<br>{% endif %}
-                                {{ order.address.city }}, {{ order.address.state }} {{ order.address.postal_code }}<br>
-                                {{ order.address.country }}
-                            </p>
                         </div>
                     </div>
                     
-                    <h6 class="border-bottom pb-2 mb-3">Order Items</h6>
-                    
+                    <h6>Items</h6>
                     <div class="table-responsive">
                         <table class="table">
                             <thead>
@@ -58,7 +37,7 @@
                                     <th>Product</th>
                                     <th>Price</th>
                                     <th>Quantity</th>
-                                    <th class="text-end">Subtotal</th>
+                                    <th>Subtotal</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -69,55 +48,81 @@
                                             <img src="{{ item.product.primary_image.url }}" alt="{{ item.product.name }}" class="img-thumbnail me-3" style="width: 50px;">
                                             <div>
                                                 <h6 class="mb-0">{{ item.product.name }}</h6>
-                                                <small class="text-muted">{{ item.product.seller.company_name }}</small>
                                             </div>
                                         </div>
                                     </td>
                                     <td>${{ item.price }}</td>
                                     <td>{{ item.quantity }}</td>
-                                    <td class="text-end">${{ item.total_price }}</td>
+                                    <td>${{ item.total_price }}</td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
-                            <tfoot class="table-group-divider">
-                                <tr>
-                                    <td colspan="3" class="text-end"><strong>Subtotal:</strong></td>
-                                    <td class="text-end">${{ order.subtotal }}</td>
-                                </tr>
-                                <tr>
-                                    <td colspan="3" class="text-end"><strong>Tax (10%):</strong></td>
-                                    <td class="text-end">${{ order.tax }}</td>
-                                </tr>
-                                <tr>
-                                    <td colspan="3" class="text-end"><strong>Shipping:</strong></td>
-                                    <td class="text-end">$0.00</td>
-                                </tr>
-                                <tr>
-                                    <td colspan="3" class="text-end"><strong>Total:</strong></td>
-                                    <td class="text-end"><strong>${{ order.total_amount }}</strong></td>
-                                </tr>
-                            </tfoot>
                         </table>
                     </div>
-                    
-                    {% if order.status == 'P' and not order.payment_status %}
-                    <div class="mt-4 text-center">
-                        <a href="{% url 'payments:retry_payment' order.id %}" class="btn btn-primary">Complete Payment</a>
-                    </div>
-                    {% endif %}
                 </div>
             </div>
             
-            <div class="d-flex justify-content-between">
-                <a href="{% url 'orders:order_history' %}" class="btn btn-outline-secondary">
-                    <i class="fas fa-arrow-left me-2"></i>Back to Orders
-                </a>
-                
-                {% if order.status == 'D' %}
-                <a href="#" class="btn btn-outline-primary">
-                    <i class="fas fa-star me-2"></i>Write a Review
-                </a>
-                {% endif %}
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Shipping Address</h5>
+                </div>
+                <div class="card-body">
+                    <p class="mb-0">
+                        {{ order.address.street_address }}<br>
+                        {% if order.address.apartment_address %}{{ order.address.apartment_address }}<br>{% endif %}
+                        {{ order.address.city }}, {{ order.address.state }} {{ order.address.postal_code }}<br>
+                        {{ order.address.country }}
+                    </p>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Payment Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Payment Method</h6>
+                            <p>{{ order.payment.get_payment_method_display }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Transaction ID</h6>
+                            <p>{{ order.payment.transaction_id }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Order Summary</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Subtotal:</span>
+                        <span>${{ order.subtotal }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Shipping:</span>
+                        <span>$0.00</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Tax:</span>
+                        <span>${{ order.tax }}</span>
+                    </div>
+                    <hr>
+                    <div class="d-flex justify-content-between mb-3">
+                        <strong>Total:</strong>
+                        <strong>${{ order.total_amount }}</strong>
+                    </div>
+                    
+                    <div class="d-grid gap-2 mt-4">
+                        <a href="{% url 'accounts:orders' %}" class="btn btn-outline-primary">Back to My Orders</a>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
