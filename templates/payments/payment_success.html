@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block title %}Payment Successful | Amazon-like{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card border-success">
+                <div class="card-header bg-success text-white">
+                    <h4 class="mb-0">Payment Successful</h4>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-check-circle text-success fa-4x"></i>
+                    </div>
+                    <h5 class="card-title text-center">Thank You for Your Order!</h5>
+                    <p class="card-text text-center">Your payment has been processed successfully.</p>
+                    
+                    <div class="alert alert-info">
+                        <h6>Order Details:</h6>
+                        <p class="mb-1"><strong>Order ID:</strong> #{{ order.id }}</p>
+                        <p class="mb-1"><strong>Date:</strong> {{ order.created_at|date:"F j, Y" }}</p>
+                        <p class="mb-1"><strong>Total Amount:</strong> ${{ order.total_amount }}</p>
+                        <p class="mb-0"><strong>Status:</strong> {{ order.get_status_display }}</p>
+                    </div>
+                    
+                    <p class="text-center">We've sent a confirmation email to your registered email address.</p>
+                    
+                    <div class="text-center mt-4">
+                        <a href="{% url 'orders:order_detail' order.id %}" class="btn btn-primary">View Order Details</a>
+                        <a href="{% url 'products:home' %}" class="btn btn-outline-secondary ms-2">Continue Shopping</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

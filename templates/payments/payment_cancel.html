@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block title %}Payment Cancelled | Amazon-like{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card border-warning">
+                <div class="card-header bg-warning text-dark">
+                    <h4 class="mb-0">Payment Cancelled</h4>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-exclamation-circle text-warning fa-4x"></i>
+                    </div>
+                    <h5 class="card-title text-center">Your Payment Was Cancelled</h5>
+                    <p class="card-text text-center">Your order has not been completed because the payment was cancelled.</p>
+                    
+                    <div class="alert alert-light border">
+                        <p class="mb-0">If you experienced any issues during the payment process, please try again or contact our customer support for assistance.</p>
+                    </div>
+                    
+                    <div class="text-center mt-4">
+                        <a href="{% url 'orders:cart' %}" class="btn btn-primary">Return to Cart</a>
+                        <a href="{% url 'products:home' %}" class="btn btn-outline-secondary ms-2">Continue Shopping</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
