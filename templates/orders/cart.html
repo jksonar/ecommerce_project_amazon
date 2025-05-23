@@ -39,15 +39,27 @@
                                     </td>
                                     <td>${{ item.product.price }}</td>
                                     <td>
-                                        <div class="input-group" style="width: 120px;">
-                                            <button class="btn btn-outline-secondary btn-sm" type="button">-</button>
-                                            <input type="text" class="form-control text-center" value="{{ item.quantity }}">
-                                            <button class="btn btn-outline-secondary btn-sm" type="button">+</button>
+                                        <div class="d-flex align-items-center">
+                                            <form action="{% url 'orders:update_cart' item.id %}" method="post" class="d-inline">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="action" value="decrease">
+                                                <button type="submit" class="btn btn-sm btn-outline-secondary">-</button>
+                                            </form>
+                                            <span class="mx-2">{{ item.quantity }}</span>
+                                            <form action="{% url 'orders:update_cart' item.id %}" method="post" class="d-inline">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="action" value="increase">
+                                                <button type="submit" class="btn btn-sm btn-outline-secondary">+</button>
+                                            </form>
                                         </div>
                                     </td>
-                                    <td>${{ item.subtotal }}</td>
+                                    <td>${{ item.total_price }}</td>
                                     <td>
-                                        <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                        <form action="{% url 'orders:update_cart' item.id %}" method="post">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="action" value="remove">
+                                            <button type="submit" class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                        </form>
                                     </td>
                                 </tr>
                                 {% endfor %}
@@ -90,7 +102,11 @@
                         <strong>${{ total }}</strong>
                     </div>
                     <div class="d-grid gap-2">
+                        {% if cart_items %}
                         <a href="{% url 'payments:checkout' %}" class="btn btn-primary">Proceed to Checkout</a>
+                        {% else %}
+                        <button class="btn btn-primary" disabled>Proceed to Checkout</button>
+                        {% endif %}
                         <a href="{% url 'products:product_list' %}" class="btn btn-outline-secondary">Continue Shopping</a>
                     </div>
                 </div>

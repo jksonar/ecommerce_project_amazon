@@ -3,213 +3,126 @@
 {% block title %}{{ product.name }} | Amazon-like{% endblock %}
 
 {% block content %}
-<div class="row">
-    <!-- Breadcrumb -->
-    <nav aria-label="breadcrumb" class="mb-4">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{% url 'products:home' %}">Home</a></li>
-            <li class="breadcrumb-item"><a href="{% url 'products:product_list' %}">Products</a></li>
-            <li class="breadcrumb-item"><a href="{% url 'products:product_list' %}?category={{ product.category.slug }}">{{ product.category.name }}</a></li>
-            <li class="breadcrumb-item active" aria-current="page">{{ product.name }}</li>
-        </ol>
-    </nav>
-
-    <!-- Product Images -->
-    <div class="col-md-5 mb-4">
-        <div id="productCarousel" class="carousel slide" data-bs-ride="carousel">
-            <div class="carousel-inner">
-                {% for image in product.images.all %}
-                <div class="carousel-item {% if forloop.first %}active{% endif %}">
-                    <img src="{{ image.image.url }}" class="d-block w-100 img-fluid" alt="{{ product.name }}">
-                </div>
-                {% empty %}
-                <div class="carousel-item active">
-                    <div class="bg-light p-5 text-center">
-                        <i class="fas fa-image fa-5x text-muted"></i>
-                        <p class="mt-3">No images available</p>
-                    </div>
-                </div>
-                {% endfor %}
-            </div>
-            {% if product.images.count > 1 %}
-            <button class="carousel-control-prev" type="button" data-bs-target="#productCarousel" data-bs-slide="prev">
-                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                <span class="visually-hidden">Previous</span>
-            </button>
-            <button class="carousel-control-next" type="button" data-bs-target="#productCarousel" data-bs-slide="next">
-                <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                <span class="visually-hidden">Next</span>
-            </button>
-            {% endif %}
-        </div>
-
-        <!-- Thumbnail Navigation -->
-        {% if product.images.count > 1 %}
-        <div class="row mt-2">
-            {% for image in product.images.all %}
-            <div class="col-3">
-                <img src="{{ image.image.url }}" class="img-thumbnail" data-bs-target="#productCarousel" data-bs-slide-to="{{ forloop.counter0 }}" alt="{{ product.name }} thumbnail">
-            </div>
-            {% endfor %}
-        </div>
-        {% endif %}
-    </div>
-
-    <!-- Product Details -->
-    <div class="col-md-7">
-        <h1 class="mb-3">{{ product.name }}</h1>
-        
-        <!-- Rating -->
-        <div class="mb-3">
-            <div class="text-warning d-inline-block">
-                {% for i in "12345"|make_list %}
-                    {% if forloop.counter <= product.average_rating %}
-                    <i class="fas fa-star"></i>
-                    {% else %}
-                    <i class="far fa-star"></i>
-                    {% endif %}
-                {% endfor %}
-            </div>
-            <span class="text-muted ms-2">({{ product.reviews.count }} reviews)</span>
-        </div>
-        
-        <!-- Price -->
-        <div class="mb-3">
-            {% if product.discount_price %}
-            <span class="text-muted text-decoration-line-through fs-4">${{ product.price }}</span>
-            <span class="text-danger fw-bold fs-2">${{ product.discount_price }}</span>
-            <span class="badge bg-danger ms-2">Sale</span>
-            {% else %}
-            <span class="fw-bold fs-2">${{ product.price }}</span>
-            {% endif %}
-        </div>
-        
-        <!-- Availability -->
-        <div class="mb-3">
-            {% if product.stock > 0 %}
-            <span class="badge bg-success">In Stock ({{ product.stock }} available)</span>
-            {% else %}
-            <span class="badge bg-danger">Out of Stock</span>
-            {% endif %}
-        </div>
-        
-        <!-- Seller -->
-        <div class="mb-3">
-            <p class="text-muted">Sold by: <a href="#">{{ product.seller.company_name }}</a></p>
-        </div>
-        
-        <!-- Description -->
-        <div class="mb-4">
-            <h5>Description</h5>
-            <p>{{ product.description }}</p>
-        </div>
-        
-        <!-- Add to Cart Form -->
-        {% if product.stock > 0 %}
-        <form method="post" action="#" class="mb-4">
-            {% csrf_token %}
-            <div class="row g-3 align-items-center">
-                <div class="col-auto">
-                    <label for="quantity" class="col-form-label">Quantity:</label>
-                </div>
-                <div class="col-auto">
-                    <input type="number" id="quantity" name="quantity" class="form-control" value="1" min="1" max="{{ product.stock }}">
-                </div>
-                <div class="col-auto">
-                    <button type="submit" class="btn btn-primary"><i class="fas fa-shopping-cart me-2"></i>Add to Cart</button>
-                </div>
-            </div>
-        </form>
-        {% endif %}
-        
-        <!-- Specifications -->
-        {% if product.specifications.exists %}
-        <div class="mb-4">
-            <h5>Specifications</h5>
-            <table class="table table-striped">
-                <tbody>
-                    {% for spec in product.specifications.all %}
-                    <tr>
-                        <th scope="row">{{ spec.name }}</th>
-                        <td>{{ spec.value }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-        {% endif %}
-    </div>
-</div>
-
-<!-- Reviews Section -->
-<div class="row mt-5">
-    <div class="col-12">
-        <h3>Customer Reviews</h3>
-        <hr>
-        
-        {% if product.reviews.exists %}
-        {% for review in product.reviews.all %}
-        <div class="card mb-3">
-            <div class="card-body">
-                <div class="d-flex justify-content-between">
-                    <h5 class="card-title">{{ review.title }}</h5>
-                    <div class="text-warning">
-                        {% for i in "12345"|make_list %}
-                            {% if forloop.counter <= review.rating %}
-                            <i class="fas fa-star"></i>
-                            {% else %}
-                            <i class="far fa-star"></i>
-                            {% endif %}
+<div class="container py-5">
+    <div class="row">
+        <!-- Product Images -->
+        <div class="col-md-5 mb-4">
+            <div class="card">
+                <img src="{{ product.primary_image.url }}" class="card-img-top" alt="{{ product.name }}">
+                <div class="card-body p-0">
+                    <div class="row g-0">
+                        {% for image in product.images.all %}
+                        <div class="col-3">
+                            <img src="{{ image.image.url }}" class="img-thumbnail" alt="{{ product.name }}">
+                        </div>
                         {% endfor %}
                     </div>
                 </div>
-                <h6 class="card-subtitle mb-2 text-muted">By {{ review.user.username }} on {{ review.created_at|date:"F d, Y" }}</h6>
-                <p class="card-text">{{ review.comment }}</p>
             </div>
         </div>
-        {% endfor %}
-        {% else %}
-        <div class="alert alert-info">
-            No reviews yet. Be the first to review this product!
-        </div>
-        {% endif %}
         
-        {% if user.is_authenticated %}
-        <div class="card mt-4">
-            <div class="card-header bg-primary text-white">
-                <h5 class="mb-0">Write a Review</h5>
+        <!-- Product Details -->
+        <div class="col-md-7">
+            <h2 class="mb-2">{{ product.name }}</h2>
+            <p class="text-muted mb-3">By {{ product.seller.company_name }}</p>
+            
+            <div class="mb-3">
+                {% if product.discount_price %}
+                <h4 class="text-danger mb-0">${{ product.discount_price }}</h4>
+                <p class="text-muted"><del>${{ product.price }}</del> ({{ product.discount_percentage }}% off)</p>
+                {% else %}
+                <h4 class="mb-0">${{ product.price }}</h4>
+                {% endif %}
             </div>
-            <div class="card-body">
-                <form method="post" action="#">
+            
+            <div class="mb-3">
+                <span class="badge bg-{{ product.stock_status_color }}">{{ product.get_stock_status_display }}</span>
+                {% if product.is_featured %}
+                <span class="badge bg-warning text-dark">Featured</span>
+                {% endif %}
+            </div>
+            
+            <div class="mb-4">
+                {{ product.short_description }}
+            </div>
+            
+            <!-- Add to Cart Form -->
+            <div class="mb-4">
+                <form action="{% url 'orders:add_to_cart' product.id %}?next={{ request.path|urlencode }}" method="post">
                     {% csrf_token %}
-                    <div class="mb-3">
-                        <label for="rating" class="form-label">Rating</label>
-                        <select class="form-select" id="rating" name="rating" required>
-                            <option value="">Select rating</option>
-                            <option value="5">5 Stars - Excellent</option>
-                            <option value="4">4 Stars - Very Good</option>
-                            <option value="3">3 Stars - Good</option>
-                            <option value="2">2 Stars - Fair</option>
-                            <option value="1">1 Star - Poor</option>
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label for="title" class="form-label">Title</label>
-                        <input type="text" class="form-control" id="title" name="title" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="comment" class="form-label">Comment</label>
-                        <textarea class="form-control" id="comment" name="comment" rows="3" required></textarea>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Submit Review</button>
+                    <button type="submit" class="btn btn-primary btn-lg" {% if product.stock_status == 'O' %}disabled{% endif %}>
+                        <i class="fas fa-shopping-cart me-2"></i>Add to Cart
+                    </button>
                 </form>
             </div>
+            
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Product Details</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-borderless">
+                        <tbody>
+                            <tr>
+                                <th scope="row">Category</th>
+                                <td>{{ product.category.name }}</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">SKU</th>
+                                <td>{{ product.sku }}</td>
+                            </tr>
+                            {% if product.weight %}
+                            <tr>
+                                <th scope="row">Weight</th>
+                                <td>{{ product.weight }} kg</td>
+                            </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
-        {% else %}
-        <div class="alert alert-info mt-4">
-            Please <a href="{% url 'accounts:login' %}">login</a> to write a review.
-        </div>
-        {% endif %}
     </div>
+    
+    <!-- Product Description -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Description</h5>
+                </div>
+                <div class="card-body">
+                    {{ product.description|linebreaks }}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Related Products -->
+    {% if related_products %}
+    <div class="row mt-5">
+        <div class="col-12">
+            <h3 class="mb-4">Related Products</h3>
+            <div class="row">
+                {% for related in related_products %}
+                <div class="col-md-3 mb-4">
+                    <div class="card h-100">
+                        <img src="{{ related.primary_image.url }}" class="card-img-top" alt="{{ related.name }}">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ related.name }}</h5>
+                            {% if related.discount_price %}
+                            <p class="card-text text-danger">${{ related.discount_price }} <small class="text-muted"><del>${{ related.price }}</del></small></p>
+                            {% else %}
+                            <p class="card-text">${{ related.price }}</p>
+                            {% endif %}
+                            <a href="{% url 'products:product_detail' related.slug %}" class="btn btn-outline-primary">View Details</a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
 </div>
 {% endblock %}

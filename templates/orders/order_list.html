@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+
+{% block title %}My Orders | Amazon-like{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <h2 class="mb-4">My Orders</h2>
+    
+    {% if orders %}
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead class="table-primary">
+                <tr>
+                    <th>Order #</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                    <th>Total</th>
+                    <th>Payment</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for order in orders %}
+                <tr>
+                    <td>{{ order.id }}</td>
+                    <td>{{ order.created_at|date:"M d, Y" }}</td>
+                    <td>
+                        {% if order.status == 'P' %}
+                            <span class="badge bg-warning text-dark">Pending</span>
+                        {% elif order.status == 'C' %}
+                            <span class="badge bg-info">Confirmed</span>
+                        {% elif order.status == 'S' %}
+                            <span class="badge bg-primary">Shipped</span>
+                        {% elif order.status == 'D' %}
+                            <span class="badge bg-success">Delivered</span>
+                        {% elif order.status == 'X' %}
+                            <span class="badge bg-danger">Cancelled</span>
+                        {% endif %}
+                    </td>
+                    <td>${{ order.total_amount }}</td>
+                    <td>
+                        {% if order.payment_status %}
+                            <span class="badge bg-success">Paid</span>
+                        {% else %}
+                            <span class="badge bg-warning text-dark">Pending</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="{% url 'orders:order_detail' order.id %}" class="btn btn-sm btn-outline-primary">View</a>
+                        {% if order.status == 'P' or order.status == 'C' %}
+                        <a href="{% url 'orders:cancel_order' order.id %}" class="btn btn-sm btn-outline-danger" onclick="return confirm('Are you sure you want to cancel this order?')">Cancel</a>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="text-center py-5">
+        <i class="fas fa-shopping-bag fa-4x mb-3 text-muted"></i>
+        <h4>You haven't placed any orders yet</h4>
+        <p class="text-muted">Once you place an order, it will appear here.</p>
+        <a href="{% url 'products:product_list' %}" class="btn btn-primary mt-3">Start Shopping</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

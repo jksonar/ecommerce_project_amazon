@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} | Amazon-like{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-3">
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Account Navigation</h5>
+            </div>
+            <div class="list-group list-group-flush">
+                <a href="{% url 'accounts:profile' %}" class="list-group-item list-group-item-action">My Profile</a>
+                <a href="{% url 'accounts:address_list' %}" class="list-group-item list-group-item-action">My Addresses</a>
+                <a href="#" class="list-group-item list-group-item-action">My Orders</a>
+                <a href="#" class="list-group-item list-group-item-action">My Reviews</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-9">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">{{ title }}</h5>
+            </div>
+            <div class="card-body">
+                <form method="post" novalidate>
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label for="id_address_type" class="form-label">Address Type</label>
+                        {{ form.address_type }}
+                        {% if form.address_type.errors %}
+                            <div class="invalid-feedback d-block">{{ form.address_type.errors }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="id_street_address" class="form-label">Street Address</label>
+                        {{ form.street_address }}
+                        {% if form.street_address.errors %}
+                            <div class="invalid-feedback d-block">{{ form.street_address.errors }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="id_apartment_address" class="form-label">Apartment, Suite, etc. (optional)</label>
+                        {{ form.apartment_address }}
+                        {% if form.apartment_address.errors %}
+                            <div class="invalid-feedback d-block">{{ form.apartment_address.errors }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="id_city" class="form-label">City</label>
+                            {{ form.city }}
+                            {% if form.city.errors %}
+                                <div class="invalid-feedback d-block">{{ form.city.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="id_state" class="form-label">State/Province</label>
+                            {{ form.state }}
+                            {% if form.state.errors %}
+                                <div class="invalid-feedback d-block">{{ form.state.errors }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="id_country" class="form-label">Country</label>
+                            {{ form.country }}
+                            {% if form.country.errors %}
+                                <div class="invalid-feedback d-block">{{ form.country.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="id_postal_code" class="form-label">Postal Code</label>
+                            {{ form.postal_code }}
+                            {% if form.postal_code.errors %}
+                                <div class="invalid-feedback d-block">{{ form.postal_code.errors }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4 form-check">
+                        {{ form.default }}
+                        <label class="form-check-label" for="id_default">Set as default address</label>
+                        {% if form.default.errors %}
+                            <div class="invalid-feedback d-block">{{ form.default.errors }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="d-flex justify-content-between">
+                        <a href="{% url 'accounts:address_list' %}" class="btn btn-outline-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-primary">Save Address</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
