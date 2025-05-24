@@ -27,7 +27,7 @@
             {% endif %}
             <div class="card-body">
                 <h5 class="card-title">{{ category.name }}</h5>
-                <a href="{% url 'products:product_list_by_category' category.slug %}" class="stretched-link"></a>
+                <a href="{% url 'products:category_detail' category.slug %}" class="stretched-link"></a>
             </div>
         </div>
     </div>

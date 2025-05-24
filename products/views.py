@@ -60,10 +60,17 @@ def product_list(request):
 def product_detail(request, slug):
     product = get_object_or_404(Product, slug=slug, is_available=True)
     related_products = Product.objects.filter(category=product.category).exclude(id=product.id)[:4]
+    reviews = product.reviews.all().order_by('-created_at')
+    user_review = None
+    
+    if request.user.is_authenticated:
+        user_review = product.reviews.filter(user=request.user).first()
     
     context = {
         'product': product,
         'related_products': related_products,
+        'reviews': reviews,
+        'user_review': user_review,
     }
     return render(request, 'products/product_detail.html', context)
 

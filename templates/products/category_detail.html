@@ -103,4 +103,26 @@
                             </div>
                         </div>
                     </div>
-                    <div
+                    <div class="card-footer d-flex justify-content-between bg-white border-top-0">
+                        <a href="{% url 'products:product_detail' product.slug %}" class="btn btn-sm btn-outline-secondary">View Details</a>
+                        <form method="post" action="{% url 'orders:add_to_cart' %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="product_id" value="{{ product.id }}">
+                            <input type="hidden" name="quantity" value="1">
+                            <button type="submit" class="btn btn-sm btn-primary">
+                                <i class="fas fa-shopping-cart"></i> Add to Cart
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="alert alert-info">
+            No products found in this category.
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
