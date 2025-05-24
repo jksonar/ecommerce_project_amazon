@@ -11,47 +11,114 @@
                     <h4 class="mb-0">Become a Seller</h4>
                 </div>
                 <div class="card-body">
-                    <div class="alert alert-info">
-                        <i class="fas fa-info-circle me-2"></i> This feature will be implemented in Phase 5.
-                    </div>
-                    
-                    <form method="post" enctype="multipart/form-data">
+                    <form method="post" enctype="multipart/form-data" novalidate>
                         {% csrf_token %}
                         
-                        <div class="mb-3">
-                            <label for="company_name" class="form-label">Company Name</label>
-                            <input type="text" class="form-control" id="company_name" name="company_name" required>
+                        {% if form.non_field_errors %}
+                        <div class="alert alert-danger">
+                            {% for error in form.non_field_errors %}
+                                {{ error }}
+                            {% endfor %}
                         </div>
+                        {% endif %}
                         
                         <div class="mb-3">
-                            <label for="description" class="form-label">Description</label>
-                            <textarea class="form-control" id="description" name="description" rows="4" required></textarea>
-                            <div class="form-text">Tell customers about your business, products, and what makes you unique.</div>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label for="logo" class="form-label">Company Logo</label>
-                            <input type="file" class="form-control" id="logo" name="logo">
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label for="website" class="form-label">Website (Optional)</label>
-                            <input type="url" class="form-control" id="website" name="website">
-                        </div>
-                        
-                        <div class="mb-4">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="terms" name="terms" required>
-                                <label class="form-check-label" for="terms">
-                                    I agree to the <a href="#">Seller Terms and Conditions</a>
-                                </label>
+                            <label for="{{ form.company_name.id_for_label }}" class="form-label">Company Name*</label>
+                            {{ form.company_name }}
+                            {% if form.company_name.errors %}
+                            <div class="text-danger">
+                                {% for error in form.company_name.errors %}
+                                    {{ error }}
+                                {% endfor %}
                             </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.description.id_for_label }}" class="form-label">Description*</label>
+                            {{ form.description }}
+                            {% if form.description.errors %}
+                            <div class="text-danger">
+                                {% for error in form.description.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                            <div class="form-text">Describe your business and what products you sell.</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.logo.id_for_label }}" class="form-label">Company Logo</label>
+                            {{ form.logo }}
+                            {% if form.logo.errors %}
+                            <div class="text-danger">
+                                {% for error in form.logo.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                            <div class="form-text">Upload your company logo (optional).</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.website.id_for_label }}" class="form-label">Website</label>
+                            {{ form.website }}
+                            {% if form.website.errors %}
+                            <div class="text-danger">
+                                {% for error in form.website.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                            <div class="form-text">Your company website (optional).</div>
+                        </div>
+                        
+                        <div class="mb-4 form-check">
+                            {{ form.terms_accepted }}
+                            <label class="form-check-label" for="{{ form.terms_accepted.id_for_label }}">
+                                I agree to the <a href="#" data-bs-toggle="modal" data-bs-target="#termsModal">Terms and Conditions</a>
+                            </label>
+                            {% if form.terms_accepted.errors %}
+                            <div class="text-danger">
+                                {% for error in form.terms_accepted.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                            {% endif %}
                         </div>
                         
                         <div class="d-grid">
-                            <button type="submit" class="btn btn-primary" disabled>Submit Application</button>
+                            <button type="submit" class="btn btn-primary">Submit Application</button>
                         </div>
                     </form>
+                </div>
+            </div>
+            
+            <!-- Terms and Conditions Modal -->
+            <div class="modal fade" id="termsModal" tabindex="-1" aria-labelledby="termsModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="termsModalLabel">Seller Terms and Conditions</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <h6>1. General Terms</h6>
+                            <p>By registering as a seller, you agree to abide by our platform's policies and guidelines.</p>
+                            
+                            <h6>2. Product Listings</h6>
+                            <p>All products must comply with our product listing guidelines and applicable laws.</p>
+                            
+                            <h6>3. Fees and Payments</h6>
+                            <p>Sellers are subject to platform fees as outlined in our fee schedule.</p>
+                            
+                            <h6>4. Account Termination</h6>
+                            <p>We reserve the right to terminate seller accounts that violate our terms.</p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
