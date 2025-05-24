@@ -19,6 +19,21 @@ def seller_register(request):
             seller.status = 'P'  # Pending status
             seller.save()
             
+            # Update user's is_seller status
+            request.user.is_seller = True
+            request.user.save()
+            
+            # Send notification to admin about new seller application
+            from dashboard.models import Notification
+            admin_users = User.objects.filter(is_staff=True)
+            for admin in admin_users:
+                Notification.objects.create(
+                    user=admin,
+                    notification_type='A',
+                    title='New Seller Application',
+                    message=f'New seller application from {request.user.username} ({seller.company_name})'
+                )
+            
             messages.success(request, 'Your seller application has been submitted and is pending approval.')
             return redirect('accounts:profile')
     else:

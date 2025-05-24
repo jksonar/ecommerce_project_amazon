@@ -13,12 +13,12 @@
                     <h5 class="mb-0">Navigation</h5>
                 </div>
                 <div class="list-group list-group-flush">
-                    <a href="#" class="list-group-item list-group-item-action active">Dashboard Home</a>
+                    <a href="{% url 'dashboard:home' %}" class="list-group-item list-group-item-action active">Dashboard Home</a>
+                    <a href="{% url 'dashboard:manage_sellers' %}" class="list-group-item list-group-item-action">Sellers</a>
                     <a href="#" class="list-group-item list-group-item-action">Products</a>
                     <a href="#" class="list-group-item list-group-item-action">Categories</a>
                     <a href="#" class="list-group-item list-group-item-action">Orders</a>
                     <a href="#" class="list-group-item list-group-item-action">Users</a>
-                    <a href="#" class="list-group-item list-group-item-action">Sellers</a>
                 </div>
             </div>
         </div>
@@ -29,35 +29,46 @@
                     <h5 class="mb-0">Dashboard Overview</h5>
                 </div>
                 <div class="card-body">
-                    <p class="card-text">Welcome to the admin dashboard. This area will be fully implemented in Phase 5.</p>
-                    <p class="card-text">From here, you'll be able to manage products, categories, orders, users, and more.</p>
+                    <p class="card-text">Welcome to the admin dashboard. From here, you can manage products, categories, orders, users, and more.</p>
                 </div>
             </div>
             
             <div class="row">
-                <div class="col-md-4 mb-4">
+                <div class="col-md-3 mb-4">
                     <div class="card bg-primary text-white">
                         <div class="card-body">
                             <h5 class="card-title">Products</h5>
-                            <p class="card-text display-4">0</p>
+                            <p class="card-text display-4">{{ product_count }}</p>
                         </div>
                     </div>
                 </div>
                 
-                <div class="col-md-4 mb-4">
+                <div class="col-md-3 mb-4">
                     <div class="card bg-success text-white">
                         <div class="card-body">
                             <h5 class="card-title">Orders</h5>
-                            <p class="card-text display-4">0</p>
+                            <p class="card-text display-4">{{ order_count }}</p>
                         </div>
                     </div>
                 </div>
                 
-                <div class="col-md-4 mb-4">
+                <div class="col-md-3 mb-4">
                     <div class="card bg-info text-white">
                         <div class="card-body">
                             <h5 class="card-title">Users</h5>
-                            <p class="card-text display-4">0</p>
+                            <p class="card-text display-4">{{ user_count }}</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-3 mb-4">
+                    <div class="card bg-warning text-white">
+                        <div class="card-body">
+                            <h5 class="card-title">Pending Sellers</h5>
+                            <p class="card-text display-4">{{ pending_sellers }}</p>
+                            {% if pending_sellers > 0 %}
+                            <a href="{% url 'dashboard:manage_sellers' %}" class="btn btn-sm btn-light">Review</a>
+                            {% endif %}
                         </div>
                     </div>
                 </div>

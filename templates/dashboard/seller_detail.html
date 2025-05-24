@@ -1,0 +1,125 @@
+{% extends 'base.html' %}
+
+{% block title %}Seller Details | Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <h2 class="mb-4">Admin Dashboard</h2>
+    
+    <div class="row">
+        <div class="col-md-3 mb-4">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Navigation</h5>
+                </div>
+                <div class="list-group list-group-flush">
+                    <a href="{% url 'dashboard:home' %}" class="list-group-item list-group-item-action">Dashboard Home</a>
+                    <a href="{% url 'dashboard:manage_sellers' %}" class="list-group-item list-group-item-action active">Sellers</a>
+                    <a href="#" class="list-group-item list-group-item-action">Products</a>
+                    <a href="#" class="list-group-item list-group-item-action">Categories</a>
+                    <a href="#" class="list-group-item list-group-item-action">Orders</a>
+                    <a href="#" class="list-group-item list-group-item-action">Users</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-9">
+            <div class="card">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Seller Details</h5>
+                    <a href="{% url 'dashboard:manage_sellers' %}" class="btn btn-light btn-sm">
+                        <i class="fas fa-arrow-left me-1"></i> Back to Sellers
+                    </a>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-4">
+                        <div class="col-md-3 text-center">
+                            {% if seller.logo %}
+                            <img src="{{ seller.logo.url }}" alt="{{ seller.company_name }}" class="img-fluid rounded mb-3" style="max-height: 150px;">
+                            {% else %}
+                            <div class="bg-light d-flex align-items-center justify-content-center rounded mb-3" style="height: 150px;">
+                                <i class="fas fa-store fa-4x text-secondary"></i>
+                            </div>
+                            {% endif %}
+                            
+                            <div class="mb-3">
+                                {% if seller.status == 'P' %}
+                                <span class="badge bg-warning">Pending</span>
+                                {% elif seller.status == 'A' %}
+                                <span class="badge bg-success">Approved</span>
+                                {% elif seller.status == 'R' %}
+                                <span class="badge bg-danger">Rejected</span>
+                                {% elif seller.status == 'S' %}
+                                <span class="badge bg-secondary">Suspended</span>
+                                {% endif %}
+                            </div>
+                            
+                            {% if seller.status == 'P' %}
+                            <div class="d-grid gap-2">
+                                <a href="{% url 'dashboard:approve_seller' seller.id %}" class="btn btn-success btn-sm">
+                                    <i class="fas fa-check me-1"></i> Approve
+                                </a>
+                                <a href="{% url 'dashboard:reject_seller' seller.id %}" class="btn btn-danger btn-sm">
+                                    <i class="fas fa-times me-1"></i> Reject
+                                </a>
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-9">
+                            <h4>{{ seller.company_name }}</h4>
+                            <p class="text-muted">Joined: {{ seller.created_at|date:"F d, Y" }}</p>
+                            
+                            <div class="mb-3">
+                                <h6>Contact Information</h6>
+                                <p><strong>Email:</strong> {{ seller.user.email }}</p>
+                                {% if seller.user.phone_number %}
+                                <p><strong>Phone:</strong> {{ seller.user.phone_number }}</p>
+                                {% endif %}
+                                {% if seller.website %}
+                                <p><strong>Website:</strong> <a href="{{ seller.website }}" target="_blank">{{ seller.website }}</a></p>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="mb-3">
+                                <h6>Description</h6>
+                                <p>{{ seller.description }}</p>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <h6>Statistics</h6>
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="card bg-light mb-2">
+                                            <div class="card-body py-2 text-center">
+                                                <h5 class="mb-0">{{ seller.products.count }}</h5>
+                                                <small class="text-muted">Products</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="card bg-light mb-2">
+                                            <div class="card-body py-2 text-center">
+                                                <h5 class="mb-0">{{ seller.order_items.count }}</h5>
+                                                <small class="text-muted">Orders</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="card bg-light mb-2">
+                                            <div class="card-body py-2 text-center">
+                                                <h5 class="mb-0">${{ seller.revenue|default:"0" }}</h5>
+                                                <small class="text-muted">Revenue</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
