@@ -1,3 +1,13 @@
+# Add these imports at the top
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from django.forms import modelformset_factory
+from products.models import Product, ProductImage
+from products.forms import ProductForm, ProductImageForm, ProductSpecificationFormSet
+from .forms import SellerForm
+from .models import Seller
+from accounts.models import User
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -94,15 +104,6 @@ def seller_dashboard(request):
     
     return render(request, 'sellers/dashboard.html', context)
 
-# Add these imports at the top
-from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.decorators import login_required
-from django.contrib import messages
-from django.forms import modelformset_factory
-from products.models import Product, ProductImage
-from products.forms import ProductForm, ProductImageForm, ProductSpecificationFormSet
-from .forms import SellerForm
-from .models import Seller
 
 # Add these views after the existing views
 
