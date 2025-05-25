@@ -346,3 +346,63 @@ def update_order_status(request, order_id):
             messages.error(request, 'Invalid status selected.')
     
     return redirect('sellers:order_detail', order_id=order_id)
+
+
+@login_required
+def seller_analytics(request):
+    # Check if user is a seller
+    if not hasattr(request.user, 'seller_profile'):
+        messages.error(request, 'You do not have permission to access this page.')
+        return render(request, 'sellers/access_denied.html')
+    
+    # Check if seller is approved
+    seller = request.user.seller_profile
+    if seller.status != 'A':
+        messages.warning(request, 'Your seller account must be approved before you can view analytics.')
+        return redirect('sellers:dashboard')
+    
+    # Get seller's orders
+    from orders.models import OrderItem, Order
+    from django.db.models import Count, Sum, F, Q
+    from django.utils import timezone
+    import datetime
+    
+    # Get date ranges
+    today = timezone.now().date()
+    start_of_week = today - datetime.timedelta(days=today.weekday())
+    start_of_month = today.replace(day=1)
+    
+    # Get order items for this seller
+    order_items = OrderItem.objects.filter(product__seller=seller)
+    
+    # Calculate revenue
+    total_revenue = order_items.filter(order__status='D').aggregate(total=Sum(F('price') * F('quantity')))['total'] or 0
+    
+    # Revenue by time period
+    weekly_revenue = order_items.filter(
+        order__status='D', 
+        order__created_at__date__gte=start_of_week
+    ).aggregate(total=Sum(F('price') * F('quantity')))['total'] or 0
+    
+    monthly_revenue = order_items.filter(
+        order__status='D', 
+        order__created_at__date__gte=start_of_month
+    ).aggregate(total=Sum(F('price') * F('quantity')))['total'] or 0
+    
+    # Top selling products
+    top_products = order_items.values(
+        'product__id', 'product__name'
+    ).annotate(
+        total_sold=Sum('quantity'),
+        revenue=Sum(F('price') * F('quantity'))
+    ).order_by('-total_sold')[:5]
+    
+    context = {
+        'seller': seller,
+        'total_revenue': total_revenue,
+        'weekly_revenue': weekly_revenue,
+        'monthly_revenue': monthly_revenue,
+        'top_products': top_products,
+    }
+    
+    return render(request, 'sellers/analytics.html', context)

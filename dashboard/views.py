@@ -132,3 +132,147 @@ def reject_seller(request, seller_id):
         return redirect('dashboard:manage_sellers')
     
     return render(request, 'dashboard/reject_seller.html', {'seller': seller})
+
+@login_required
+def manage_users(request):
+    # Check if user is staff
+    if not request.user.is_staff:
+        messages.error(request, 'You do not have permission to access this page.')
+        return render(request, 'dashboard/access_denied.html')
+    
+    # Get all users
+    from accounts.models import User
+    users = User.objects.all().order_by('-date_joined')
+    
+    return render(request, 'dashboard/manage_users.html', {'users': users})
+
+@login_required
+def user_detail(request, user_id):
+    # Check if user is staff
+    if not request.user.is_staff:
+        messages.error(request, 'You do not have permission to access this page.')
+        return render(request, 'dashboard/access_denied.html')
+    
+    # Get user
+    from accounts.models import User
+    user = get_object_or_404(User, id=user_id)
+    
+    return render(request, 'dashboard/user_detail.html', {'user_profile': user})
+
+@login_required
+def manage_products(request):
+    # Check if user is staff
+    if not request.user.is_staff:
+        messages.error(request, 'You do not have permission to access this page.')
+        return render(request, 'dashboard/access_denied.html')
+    
+    # Get all products
+    from products.models import Product
+    products = Product.objects.all().order_by('-created_at')
+    
+    return render(request, 'dashboard/manage_products.html', {'products': products})
+
+@login_required
+def product_detail(request, product_id):
+    # Check if user is staff
+    if not request.user.is_staff:
+        messages.error(request, 'You do not have permission to access this page.')
+        return render(request, 'dashboard/access_denied.html')
+    
+    # Get product
+    from products.models import Product
+    product = get_object_or_404(Product, id=product_id)
+    
+    return render(request, 'dashboard/product_detail.html', {'product': product})
+
+@login_required
+def toggle_product_feature(request, product_id):
+    # Check if user is staff
+    if not request.user.is_staff:
+        messages.error(request, 'You do not have permission to access this page.')
+        return render(request, 'dashboard/access_denied.html')
+    
+    # Get product
+    from products.models import Product
+    product = get_object_or_404(Product, id=product_id)
+    
+    # Toggle featured status
+    product.is_featured = not product.is_featured
+    product.save()
+    
+    messages.success(request, f'Product "{product.name}" is now {"featured" if product.is_featured else "unfeatured"}.')
+    return redirect('dashboard:manage_products')
+
+
+@login_required
+def manage_categories(request):
+    # Check if user is staff
+    if not request.user.is_staff:
+        messages.error(request, 'You do not have permission to access this page.')
+        return render(request, 'dashboard/access_denied.html')
+    
+    # Get all categories
+    from products.models import Category
+    categories = Category.objects.all().order_by('name')
+    
+    return render(request, 'dashboard/manage_categories.html', {'categories': categories})
+
+@login_required
+def add_category(request):
+    # Check if user is staff
+    if not request.user.is_staff:
+        messages.error(request, 'You do not have permission to access this page.')
+        return render(request, 'dashboard/access_denied.html')
+    
+    from products.models import Category
+    from django import forms
+    
+    class CategoryForm(forms.ModelForm):
+        class Meta:
+            model = Category
+            fields = ['name', 'parent', 'description']
+            widgets = {
+                'description': forms.Textarea(attrs={'rows': 3}),
+            }
+    
+    if request.method == 'POST':
+        form = CategoryForm(request.POST)
+        if form.is_valid():
+            category = form.save(commit=False)
+            # Generate slug from name
+            from django.utils.text import slugify
+            category.slug = slugify(category.name)
+            category.save()
+            messages.success(request, f'Category "{category.name}" has been added.')
+            return redirect('dashboard:manage_categories')
+    else:
+        form = CategoryForm()
+    
+    return render(request, 'dashboard/add_category.html', {'form': form})
+
+
+@login_required
+def manage_orders(request):
+    # Check if user is staff
+    if not request.user.is_staff:
+        messages.error(request, 'You do not have permission to access this page.')
+        return render(request, 'dashboard/access_denied.html')
+    
+    # Get all orders
+    from orders.models import Order
+    orders = Order.objects.all().order_by('-created_at')
+    
+    return render(request, 'dashboard/manage_orders.html', {'orders': orders})
+
+@login_required
+def order_detail(request, order_id):
+    # Check if user is staff
+    if not request.user.is_staff:
+        messages.error(request, 'You do not have permission to access this page.')
+        return render(request, 'dashboard/access_denied.html')
+    
+    # Get order
+    from orders.models import Order
+    order = get_object_or_404(Order, id=order_id)
+    
+    return render(request, 'dashboard/order_detail.html', {'order': order})
