@@ -16,12 +16,15 @@ class ProductForm(forms.ModelForm):
         self.fields['is_available'].widget.attrs.update({'class': 'form-check-input'})
 
 class ProductImageForm(forms.ModelForm):
+    # Add a new field for multiple images that doesn't use multiple=True in the widget
+    images = forms.FileField(
+        widget=forms.FileInput(attrs={'class': 'form-control'}),
+        required=False
+    )
+    
     class Meta:
         model = ProductImage
         fields = ['image']
-        widgets = {
-            'image': forms.ClearableFileInput(attrs={'class': 'form-control', 'multiple': True}),
-        }
 
 class ProductSpecificationForm(forms.ModelForm):
     class Meta:

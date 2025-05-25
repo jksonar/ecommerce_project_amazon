@@ -1,0 +1,142 @@
+{% extends 'base.html' %}
+
+{% block title %}Order #{{ order.id }} | Seller Dashboard{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <h2 class="mb-4">Seller Dashboard</h2>
+    
+    <div class="row">
+        <div class="col-md-3 mb-4">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Navigation</h5>
+                </div>
+                <div class="list-group list-group-flush">
+                    <a href="{% url 'sellers:dashboard' %}" class="list-group-item list-group-item-action">Dashboard</a>
+                    <a href="{% url 'sellers:products' %}" class="list-group-item list-group-item-action">Products</a>
+                    <a href="{% url 'sellers:orders' %}" class="list-group-item list-group-item-action active">Orders</a>
+                    <a href="#" class="list-group-item list-group-item-action">Reviews</a>
+                    <a href="#" class="list-group-item list-group-item-action">Settings</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-9">
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Order #{{ order.id }}</h5>
+                    <span class="badge bg-{% if order.status == 'P' %}warning{% elif order.status == 'C' %}info{% elif order.status == 'S' %}primary{% elif order.status == 'D' %}success{% elif order.status == 'X' %}danger{% endif %} {% if order.status == 'P' %}text-dark{% endif %}">
+                        {{ order.get_status_display }}
+                    </span>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h6>Order Date</h6>
+                            <p>{{ order.created_at|date:"F d, Y" }}</p>
+                            
+                            <h6>Customer</h6>
+                            <p>{{ order.user.get_full_name|default:order.user.username }}</p>
+                            
+                            <h6>Payment Status</h6>
+                            <p>
+                                {% if order.payment_status %}
+                                <span class="badge bg-success">Paid</span>
+                                {% else %}
+                                <span class="badge bg-warning text-dark">Pending</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Shipping Address</h6>
+                            <p>
+                                {{ order.address.street_address }}<br>
+                                {% if order.address.apartment_address %}{{ order.address.apartment_address }}<br>{% endif %}
+                                {{ order.address.city }}, {{ order.address.state }} {{ order.address.postal_code }}<br>
+                                {{ order.address.country }}
+                            </p>
+                            
+                            {% if order.tracking_number %}
+                            <h6>Tracking Number</h6>
+                            <p>{{ order.tracking_number }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <h6 class="border-bottom pb-2 mb-3">Your Items in This Order</h6>
+                    
+                    <div class="table-responsive mb-4">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Product</th>
+                                    <th>Price</th>
+                                    <th>Quantity</th>
+                                    <th class="text-end">Subtotal</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in seller_items %}
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            {% if item.product.images.first %}
+                                            <img src="{{ item.product.images.first.image.url }}" alt="{{ item.product.name }}" class="img-thumbnail me-3" style="width: 50px;">
+                                            {% else %}
+                                            <div class="bg-light me-3 d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                                                <i class="fas fa-image text-secondary"></i>
+                                            </div>
+                                            {% endif %}
+                                            <div>
+                                                <h6 class="mb-0">{{ item.product.name }}</h6>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>${{ item.price }}</td>
+                                    <td>{{ item.quantity }}</td>
+                                    <td class="text-end">${{ item.total_price }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                            <tfoot class="table-group-divider">
+                                <tr>
+                                    <th colspan="3" class="text-end">Your Total:</th>
+                                    <th class="text-end">${{ seller_subtotal }}</th>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                    
+                    {% if order.status != 'X' and order.status != 'D' %}
+                    <div class="card mb-3">
+                        <div class="card-header bg-light">
+                            <h6 class="mb-0">Update Order Status</h6>
+                        </div>
+                        <div class="card-body">
+                            <form action="{% url 'sellers:update_order_status' order.id %}" method="post" class="d-flex">
+                                {% csrf_token %}
+                                <select name="status" class="form-select me-2">
+                                    <option value="P" {% if order.status == 'P' %}selected{% endif %}>Pending</option>
+                                    <option value="C" {% if order.status == 'C' %}selected{% endif %}>Confirmed</option>
+                                    <option value="S" {% if order.status == 'S' %}selected{% endif %}>Shipped</option>
+                                    <option value="D" {% if order.status == 'D' %}selected{% endif %}>Delivered</option>
+                                    <option value="X" {% if order.status == 'X' %}selected{% endif %}>Cancelled</option>
+                                </select>
+                                <button type="submit" class="btn btn-primary">Update</button>
+                            </form>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="text-end">
+                        <a href="{% url 'sellers:orders' %}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left me-1"></i> Back to Orders
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

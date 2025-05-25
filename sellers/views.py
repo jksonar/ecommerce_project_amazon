@@ -57,18 +57,38 @@ def seller_dashboard(request):
     products = seller.products.all().order_by('-created_at')
     
     # Get seller's orders
-    from orders.models import OrderItem
+    from orders.models import OrderItem, Order
     order_items = OrderItem.objects.filter(product__seller=seller).select_related('order', 'product')
     
+    # Get unique orders that contain this seller's products
+    orders_with_seller_items = Order.objects.filter(
+        items__product__seller=seller
+    ).distinct().order_by('-created_at')
+    
+    # For each order, calculate the seller's portion
+    recent_orders = []
+    for order in orders_with_seller_items[:5]:  # Get only 5 most recent orders
+        # Get only this seller's items in the order
+        seller_items = order.items.filter(product__seller=seller)
+        
+        # Calculate seller's subtotal for this order
+        seller_subtotal = sum(item.price * item.quantity for item in seller_items)
+        
+        recent_orders.append({
+            'order': order,
+            'seller_items': seller_items,
+            'seller_subtotal': seller_subtotal,
+        })
+    
     # Calculate revenue
-    revenue = sum(item.get_total_price() for item in order_items if item.order.status == 'C')
+    revenue = sum(item.price * item.quantity for item in order_items if item.order.status == 'D')
     
     context = {
         'seller': seller,
         'products': products[:5],  # Show only 5 most recent products
-        'orders': order_items[:5],  # Show only 5 most recent orders
+        'recent_orders': recent_orders,  # Show only 5 most recent orders
         'total_products': products.count(),
-        'total_orders': order_items.count(),
+        'total_orders': orders_with_seller_items.count(),
         'revenue': revenue,
     }
     
@@ -121,7 +141,7 @@ def add_product(request):
             product.save()
             
             # Handle multiple image uploads
-            images = request.FILES.getlist('image')
+            images = request.FILES.getlist('images')  # Changed from 'image' to 'images'
             for image in images:
                 ProductImage.objects.create(product=product, image=image)
             
@@ -194,3 +214,134 @@ def delete_product(request, product_id):
         return redirect('sellers:products')
     
     return render(request, 'sellers/delete_product.html', {'product': product})
+
+
+@login_required
+def seller_orders(request):
+    # Check if user is a seller
+    if not hasattr(request.user, 'seller_profile'):
+        messages.error(request, 'You do not have permission to access this page.')
+        return render(request, 'sellers/access_denied.html')
+    
+    # Check if seller is approved
+    seller = request.user.seller_profile
+    if seller.status != 'A':
+        messages.warning(request, 'Your seller account must be approved before you can manage orders.')
+        return redirect('sellers:dashboard')
+    
+    # Get orders containing seller's products
+    from django.db.models import Count, Sum, F, Q
+    from orders.models import Order, OrderItem
+    
+    # Get unique orders that contain this seller's products
+    orders_with_seller_items = Order.objects.filter(
+        items__product__seller=seller
+    ).distinct().order_by('-created_at')
+    
+    # For each order, calculate the seller's portion
+    seller_order_data = []
+    for order in orders_with_seller_items:
+        # Get only this seller's items in the order
+        seller_items = order.items.filter(product__seller=seller)
+        
+        # Calculate seller's subtotal for this order
+        seller_subtotal = sum(item.price * item.quantity for item in seller_items)
+        
+        # Count seller's items in this order
+        seller_item_count = seller_items.count()
+        
+        seller_order_data.append({
+            'order': order,
+            'seller_items': seller_items,
+            'seller_subtotal': seller_subtotal,
+            'seller_item_count': seller_item_count
+        })
+    
+    context = {
+        'seller_order_data': seller_order_data,
+    }
+    
+    return render(request, 'sellers/orders.html', context)
+
+@login_required
+def seller_order_detail(request, order_id):
+    # Check if user is a seller
+    if not hasattr(request.user, 'seller_profile'):
+        messages.error(request, 'You do not have permission to access this page.')
+        return render(request, 'sellers/access_denied.html')
+    
+    # Check if seller is approved
+    seller = request.user.seller_profile
+    if seller.status != 'A':
+        messages.warning(request, 'Your seller account must be approved before you can manage orders.')
+        return redirect('sellers:dashboard')
+    
+    # Get the order
+    from orders.models import Order
+    order = get_object_or_404(Order, id=order_id)
+    
+    # Get only this seller's items in the order
+    seller_items = order.items.filter(product__seller=seller)
+    
+    # Check if the seller has items in this order
+    if not seller_items.exists():
+        messages.error(request, 'You do not have any products in this order.')
+        return redirect('sellers:orders')
+    
+    # Calculate seller's subtotal for this order
+    seller_subtotal = sum(item.price * item.quantity for item in seller_items)
+    
+    context = {
+        'order': order,
+        'seller_items': seller_items,
+        'seller_subtotal': seller_subtotal,
+    }
+    
+    return render(request, 'sellers/order_detail.html', context)
+
+@login_required
+def update_order_status(request, order_id):
+    # Check if user is a seller
+    if not hasattr(request.user, 'seller_profile'):
+        messages.error(request, 'You do not have permission to access this page.')
+        return render(request, 'sellers/access_denied.html')
+    
+    # Check if seller is approved
+    seller = request.user.seller_profile
+    if seller.status != 'A':
+        messages.warning(request, 'Your seller account must be approved before you can manage orders.')
+        return redirect('sellers:dashboard')
+    
+    # Get the order
+    from orders.models import Order
+    order = get_object_or_404(Order, id=order_id)
+    
+    # Get only this seller's items in the order
+    seller_items = order.items.filter(product__seller=seller)
+    
+    # Check if the seller has items in this order
+    if not seller_items.exists():
+        messages.error(request, 'You do not have any products in this order.')
+        return redirect('sellers:orders')
+    
+    if request.method == 'POST':
+        new_status = request.POST.get('status')
+        if new_status in dict(Order.STATUS_CHOICES).keys():
+            # Update the order status
+            order.status = new_status
+            order.save()
+            
+            # Add a notification for the customer
+            from dashboard.models import Notification
+            Notification.objects.create(
+                user=order.user,
+                notification_type='O',  # Order notification
+                title='Order Status Updated',
+                message=f'Your order #{order.id} status has been updated to {order.get_status_display()}.'
+            )
+            
+            messages.success(request, f'Order status updated to {order.get_status_display()}.')
+        else:
+            messages.error(request, 'Invalid status selected.')
+    
+    return redirect('sellers:order_detail', order_id=order_id)
