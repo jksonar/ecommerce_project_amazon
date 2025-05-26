@@ -103,8 +103,6 @@
                         </div>
                         
                         <div class="tab-pane fade" id="pending" role="tabpanel">
-                            {% with pending_orders=orders|selectattr:"status","equalto":"P" %}
-                            {% if pending_orders %}
                             <div class="table-responsive">
                                 <table class="table table-hover">
                                     <thead>
@@ -117,33 +115,44 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {% for order in pending_orders %}
-                                        <tr>
-                                            <td>{{ order.id }}</td>
-                                            <td>{{ order.created_at|date:"M d, Y" }}</td>
-                                            <td>{{ order.user.username }}</td>
-                                            <td>${{ order.total }}</td>
-                                            <td>
-                                                <div class="btn-group btn-group-sm">
-                                                    <a href="{% url 'dashboard:order_detail' order.id %}" class="btn btn-outline-primary">
-                                                        <i class="fas fa-eye"></i>
-                                                    </a>
-                                                </div>
-                                            </td>
-                                        </tr>
+                                        {% for order in orders %}
+                                            {% if order.status == 'P' %}
+                                            <tr>
+                                                <td>{{ order.id }}</td>
+                                                <td>{{ order.created_at|date:"M d, Y" }}</td>
+                                                <td>{{ order.user.username }}</td>
+                                                <td>${{ order.total }}</td>
+                                                <td>
+                                                    <div class="btn-group btn-group-sm">
+                                                        <a href="{% url 'dashboard:order_detail' order.id %}" class="btn btn-outline-primary">
+                                                            <i class="fas fa-eye"></i>
+                                                        </a>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            {% endif %}
                                         {% endfor %}
                                     </tbody>
                                 </table>
                             </div>
-                            {% else %}
+                            {% if not orders %}
                             <p class="text-center py-3">No pending orders.</p>
+                            {% else %}
+                                {% with has_pending=False %}
+                                    {% for order in orders %}
+                                        {% if order.status == 'P' %}
+                                            {% with has_pending=True %}
+                                            {% endwith %}
+                                        {% endif %}
+                                    {% endfor %}
+                                    {% if not has_pending %}
+                                    <p class="text-center py-3">No pending orders.</p>
+                                    {% endif %}
+                                {% endwith %}
                             {% endif %}
-                            {% endwith %}
                         </div>
                         
                         <div class="tab-pane fade" id="confirmed" role="tabpanel">
-                            {% with confirmed_orders=orders|selectattr:"status","equalto":"C" %}
-                            {% if confirmed_orders %}
                             <div class="table-responsive">
                                 <table class="table table-hover">
                                     <thead>
@@ -156,33 +165,44 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {% for order in confirmed_orders %}
-                                        <tr>
-                                            <td>{{ order.id }}</td>
-                                            <td>{{ order.created_at|date:"M d, Y" }}</td>
-                                            <td>{{ order.user.username }}</td>
-                                            <td>${{ order.total }}</td>
-                                            <td>
-                                                <div class="btn-group btn-group-sm">
-                                                    <a href="{% url 'dashboard:order_detail' order.id %}" class="btn btn-outline-primary">
-                                                        <i class="fas fa-eye"></i>
-                                                    </a>
-                                                </div>
-                                            </td>
-                                        </tr>
+                                        {% for order in orders %}
+                                            {% if order.status == 'C' %}
+                                            <tr>
+                                                <td>{{ order.id }}</td>
+                                                <td>{{ order.created_at|date:"M d, Y" }}</td>
+                                                <td>{{ order.user.username }}</td>
+                                                <td>${{ order.total }}</td>
+                                                <td>
+                                                    <div class="btn-group btn-group-sm">
+                                                        <a href="{% url 'dashboard:order_detail' order.id %}" class="btn btn-outline-primary">
+                                                            <i class="fas fa-eye"></i>
+                                                        </a>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            {% endif %}
                                         {% endfor %}
                                     </tbody>
                                 </table>
                             </div>
-                            {% else %}
+                            {% if not orders %}
                             <p class="text-center py-3">No confirmed orders.</p>
+                            {% else %}
+                                {% with has_confirmed=False %}
+                                    {% for order in orders %}
+                                        {% if order.status == 'C' %}
+                                            {% with has_confirmed=True %}
+                                            {% endwith %}
+                                        {% endif %}
+                                    {% endfor %}
+                                    {% if not has_confirmed %}
+                                    <p class="text-center py-3">No confirmed orders.</p>
+                                    {% endif %}
+                                {% endwith %}
                             {% endif %}
-                            {% endwith %}
                         </div>
                         
                         <div class="tab-pane fade" id="shipped" role="tabpanel">
-                            {% with shipped_orders=orders|selectattr:"status","equalto":"S" %}
-                            {% if shipped_orders %}
                             <div class="table-responsive">
                                 <table class="table table-hover">
                                     <thead>
@@ -195,33 +215,44 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {% for order in shipped_orders %}
-                                        <tr>
-                                            <td>{{ order.id }}</td>
-                                            <td>{{ order.created_at|date:"M d, Y" }}</td>
-                                            <td>{{ order.user.username }}</td>
-                                            <td>${{ order.total }}</td>
-                                            <td>
-                                                <div class="btn-group btn-group-sm">
-                                                    <a href="{% url 'dashboard:order_detail' order.id %}" class="btn btn-outline-primary">
-                                                        <i class="fas fa-eye"></i>
-                                                    </a>
-                                                </div>
-                                            </td>
-                                        </tr>
+                                        {% for order in orders %}
+                                            {% if order.status == 'S' %}
+                                            <tr>
+                                                <td>{{ order.id }}</td>
+                                                <td>{{ order.created_at|date:"M d, Y" }}</td>
+                                                <td>{{ order.user.username }}</td>
+                                                <td>${{ order.total }}</td>
+                                                <td>
+                                                    <div class="btn-group btn-group-sm">
+                                                        <a href="{% url 'dashboard:order_detail' order.id %}" class="btn btn-outline-primary">
+                                                            <i class="fas fa-eye"></i>
+                                                        </a>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            {% endif %}
                                         {% endfor %}
                                     </tbody>
                                 </table>
                             </div>
-                            {% else %}
+                            {% if not orders %}
                             <p class="text-center py-3">No shipped orders.</p>
+                            {% else %}
+                                {% with has_shipped=False %}
+                                    {% for order in orders %}
+                                        {% if order.status == 'S' %}
+                                            {% with has_shipped=True %}
+                                            {% endwith %}
+                                        {% endif %}
+                                    {% endfor %}
+                                    {% if not has_shipped %}
+                                    <p class="text-center py-3">No shipped orders.</p>
+                                    {% endif %}
+                                {% endwith %}
                             {% endif %}
-                            {% endwith %}
                         </div>
                         
                         <div class="tab-pane fade" id="delivered" role="tabpanel">
-                            {% with delivered_orders=orders|selectattr:"status","equalto":"D" %}
-                            {% if delivered_orders %}
                             <div class="table-responsive">
                                 <table class="table table-hover">
                                     <thead>
@@ -234,33 +265,44 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {% for order in delivered_orders %}
-                                        <tr>
-                                            <td>{{ order.id }}</td>
-                                            <td>{{ order.created_at|date:"M d, Y" }}</td>
-                                            <td>{{ order.user.username }}</td>
-                                            <td>${{ order.total }}</td>
-                                            <td>
-                                                <div class="btn-group btn-group-sm">
-                                                    <a href="{% url 'dashboard:order_detail' order.id %}" class="btn btn-outline-primary">
-                                                        <i class="fas fa-eye"></i>
-                                                    </a>
-                                                </div>
-                                            </td>
-                                        </tr>
+                                        {% for order in orders %}
+                                            {% if order.status == 'D' %}
+                                            <tr>
+                                                <td>{{ order.id }}</td>
+                                                <td>{{ order.created_at|date:"M d, Y" }}</td>
+                                                <td>{{ order.user.username }}</td>
+                                                <td>${{ order.total }}</td>
+                                                <td>
+                                                    <div class="btn-group btn-group-sm">
+                                                        <a href="{% url 'dashboard:order_detail' order.id %}" class="btn btn-outline-primary">
+                                                            <i class="fas fa-eye"></i>
+                                                        </a>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            {% endif %}
                                         {% endfor %}
                                     </tbody>
                                 </table>
                             </div>
-                            {% else %}
+                            {% if not orders %}
                             <p class="text-center py-3">No delivered orders.</p>
+                            {% else %}
+                                {% with has_delivered=False %}
+                                    {% for order in orders %}
+                                        {% if order.status == 'D' %}
+                                            {% with has_delivered=True %}
+                                            {% endwith %}
+                                        {% endif %}
+                                    {% endfor %}
+                                    {% if not has_delivered %}
+                                    <p class="text-center py-3">No delivered orders.</p>
+                                    {% endif %}
+                                {% endwith %}
                             {% endif %}
-                            {% endwith %}
                         </div>
                         
                         <div class="tab-pane fade" id="cancelled" role="tabpanel">
-                            {% with cancelled_orders=orders|selectattr:"status","equalto":"X" %}
-                            {% if cancelled_orders %}
                             <div class="table-responsive">
                                 <table class="table table-hover">
                                     <thead>
@@ -273,28 +315,41 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {% for order in cancelled_orders %}
-                                        <tr>
-                                            <td>{{ order.id }}</td>
-                                            <td>{{ order.created_at|date:"M d, Y" }}</td>
-                                            <td>{{ order.user.username }}</td>
-                                            <td>${{ order.total }}</td>
-                                            <td>
-                                                <div class="btn-group btn-group-sm">
-                                                    <a href="{% url 'dashboard:order_detail' order.id %}" class="btn btn-outline-primary">
-                                                        <i class="fas fa-eye"></i>
-                                                    </a>
-                                                </div>
-                                            </td>
-                                        </tr>
+                                        {% for order in orders %}
+                                            {% if order.status == 'X' %}
+                                            <tr>
+                                                <td>{{ order.id }}</td>
+                                                <td>{{ order.created_at|date:"M d, Y" }}</td>
+                                                <td>{{ order.user.username }}</td>
+                                                <td>${{ order.total }}</td>
+                                                <td>
+                                                    <div class="btn-group btn-group-sm">
+                                                        <a href="{% url 'dashboard:order_detail' order.id %}" class="btn btn-outline-primary">
+                                                            <i class="fas fa-eye"></i>
+                                                        </a>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            {% endif %}
                                         {% endfor %}
                                     </tbody>
                                 </table>
                             </div>
-                            {% else %}
+                            {% if not orders %}
                             <p class="text-center py-3">No cancelled orders.</p>
+                            {% else %}
+                                {% with has_cancelled=False %}
+                                    {% for order in orders %}
+                                        {% if order.status == 'X' %}
+                                            {% with has_cancelled=True %}
+                                            {% endwith %}
+                                        {% endif %}
+                                    {% endfor %}
+                                    {% if not has_cancelled %}
+                                    <p class="text-center py-3">No cancelled orders.</p>
+                                    {% endif %}
+                                {% endwith %}
                             {% endif %}
-                            {% endwith %}
                         </div>
                     </div>
                 </div>

@@ -99,8 +99,6 @@
                         </div>
                         
                         <div class="tab-pane fade" id="customers" role="tabpanel">
-                            {% with customers=users|rejectattr:"is_seller"|rejectattr:"is_staff" %}
-                            {% if customers %}
                             <div class="table-responsive">
                                 <table class="table table-hover">
                                     <thead>
@@ -113,39 +111,38 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {% for user in customers %}
-                                        <tr>
-                                            <td>{{ user.username }}</td>
-                                            <td>{{ user.email }}</td>
-                                            <td>{{ user.date_joined|date:"M d, Y" }}</td>
-                                            <td>
-                                                {% if user.is_active %}
-                                                    <span class="badge bg-success">Active</span>
-                                                {% else %}
-                                                    <span class="badge bg-danger">Inactive</span>
-                                                {% endif %}
-                                            </td>
-                                            <td>
-                                                <div class="btn-group btn-group-sm">
-                                                    <a href="{% url 'dashboard:user_detail' user.id %}" class="btn btn-outline-primary">
-                                                        <i class="fas fa-eye"></i>
-                                                    </a>
-                                                </div>
-                                            </td>
-                                        </tr>
+                                        {% for user in users %}
+                                            {% if not user.is_seller and not user.is_staff %}
+                                            <tr>
+                                                <td>{{ user.username }}</td>
+                                                <td>{{ user.email }}</td>
+                                                <td>{{ user.date_joined|date:"M d, Y" }}</td>
+                                                <td>
+                                                    {% if user.is_active %}
+                                                        <span class="badge bg-success">Active</span>
+                                                    {% else %}
+                                                        <span class="badge bg-danger">Inactive</span>
+                                                    {% endif %}
+                                                </td>
+                                                <td>
+                                                    <div class="btn-group btn-group-sm">
+                                                        <a href="{% url 'dashboard:user_detail' user.id %}" class="btn btn-outline-primary">
+                                                            <i class="fas fa-eye"></i>
+                                                        </a>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            {% endif %}
                                         {% endfor %}
                                     </tbody>
                                 </table>
                             </div>
-                            {% else %}
+                            {% if not users|dictsort:"is_seller"|first or users|dictsort:"is_staff"|first %}
                             <p class="text-center py-3">No customers found.</p>
                             {% endif %}
-                            {% endwith %}
                         </div>
                         
                         <div class="tab-pane fade" id="sellers" role="tabpanel">
-                            {% with sellers=users|selectattr:"is_seller" %}
-                            {% if sellers %}
                             <div class="table-responsive">
                                 <table class="table table-hover">
                                     <thead>
@@ -158,39 +155,38 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {% for user in sellers %}
-                                        <tr>
-                                            <td>{{ user.username }}</td>
-                                            <td>{{ user.email }}</td>
-                                            <td>{{ user.date_joined|date:"M d, Y" }}</td>
-                                            <td>
-                                                {% if user.is_active %}
-                                                    <span class="badge bg-success">Active</span>
-                                                {% else %}
-                                                    <span class="badge bg-danger">Inactive</span>
-                                                {% endif %}
-                                            </td>
-                                            <td>
-                                                <div class="btn-group btn-group-sm">
-                                                    <a href="{% url 'dashboard:user_detail' user.id %}" class="btn btn-outline-primary">
-                                                        <i class="fas fa-eye"></i>
-                                                    </a>
-                                                </div>
-                                            </td>
-                                        </tr>
+                                        {% for user in users %}
+                                            {% if user.is_seller %}
+                                            <tr>
+                                                <td>{{ user.username }}</td>
+                                                <td>{{ user.email }}</td>
+                                                <td>{{ user.date_joined|date:"M d, Y" }}</td>
+                                                <td>
+                                                    {% if user.is_active %}
+                                                        <span class="badge bg-success">Active</span>
+                                                    {% else %}
+                                                        <span class="badge bg-danger">Inactive</span>
+                                                    {% endif %}
+                                                </td>
+                                                <td>
+                                                    <div class="btn-group btn-group-sm">
+                                                        <a href="{% url 'dashboard:user_detail' user.id %}" class="btn btn-outline-primary">
+                                                            <i class="fas fa-eye"></i>
+                                                        </a>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            {% endif %}
                                         {% endfor %}
                                     </tbody>
                                 </table>
                             </div>
-                            {% else %}
+                            {% if not users|dictsort:"is_seller"|last %}
                             <p class="text-center py-3">No sellers found.</p>
                             {% endif %}
-                            {% endwith %}
                         </div>
                         
                         <div class="tab-pane fade" id="staff" role="tabpanel">
-                            {% with staff=users|selectattr:"is_staff" %}
-                            {% if staff %}
                             <div class="table-responsive">
                                 <table class="table table-hover">
                                     <thead>
@@ -203,34 +199,35 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {% for user in staff %}
-                                        <tr>
-                                            <td>{{ user.username }}</td>
-                                            <td>{{ user.email }}</td>
-                                            <td>{{ user.date_joined|date:"M d, Y" }}</td>
-                                            <td>
-                                                {% if user.is_active %}
-                                                    <span class="badge bg-success">Active</span>
-                                                {% else %}
-                                                    <span class="badge bg-danger">Inactive</span>
-                                                {% endif %}
-                                            </td>
-                                            <td>
-                                                <div class="btn-group btn-group-sm">
-                                                    <a href="{% url 'dashboard:user_detail' user.id %}" class="btn btn-outline-primary">
-                                                        <i class="fas fa-eye"></i>
-                                                    </a>
-                                                </div>
-                                            </td>
-                                        </tr>
+                                        {% for user in users %}
+                                            {% if user.is_staff %}
+                                            <tr>
+                                                <td>{{ user.username }}</td>
+                                                <td>{{ user.email }}</td>
+                                                <td>{{ user.date_joined|date:"M d, Y" }}</td>
+                                                <td>
+                                                    {% if user.is_active %}
+                                                        <span class="badge bg-success">Active</span>
+                                                    {% else %}
+                                                        <span class="badge bg-danger">Inactive</span>
+                                                    {% endif %}
+                                                </td>
+                                                <td>
+                                                    <div class="btn-group btn-group-sm">
+                                                        <a href="{% url 'dashboard:user_detail' user.id %}" class="btn btn-outline-primary">
+                                                            <i class="fas fa-eye"></i>
+                                                        </a>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            {% endif %}
                                         {% endfor %}
                                     </tbody>
                                 </table>
                             </div>
-                            {% else %}
+                            {% if not users|dictsort:"is_staff"|last %}
                             <p class="text-center py-3">No staff found.</p>
                             {% endif %}
-                            {% endwith %}
                         </div>
                     </div>
                 </div>

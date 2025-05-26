@@ -96,8 +96,6 @@
                         </div>
                         
                         <div class="tab-pane fade" id="featured" role="tabpanel">
-                            {% with featured_products=products|selectattr:"is_featured" %}
-                            {% if featured_products %}
                             <div class="table-responsive">
                                 <table class="table table-hover">
                                     <thead>
@@ -111,40 +109,39 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {% for product in featured_products %}
-                                        <tr>
-                                            <td>{{ product.name }}</td>
-                                            <td>{{ product.category.name }}</td>
-                                            <td>{{ product.seller.company_name }}</td>
-                                            <td>${{ product.price }}</td>
-                                            <td>
-                                                {% if product.stock > 0 %}
-                                                    <span class="badge bg-success">{{ product.stock }}</span>
-                                                {% else %}
-                                                    <span class="badge bg-danger">Out of stock</span>
-                                                {% endif %}
-                                            </td>
-                                            <td>
-                                                <div class="btn-group btn-group-sm">
-                                                    <a href="{% url 'dashboard:product_detail' product.id %}" class="btn btn-outline-primary">
-                                                        <i class="fas fa-eye"></i>
-                                                    </a>
-                                                </div>
-                                            </td>
-                                        </tr>
+                                        {% for product in products %}
+                                            {% if product.is_featured %}
+                                            <tr>
+                                                <td>{{ product.name }}</td>
+                                                <td>{{ product.category.name }}</td>
+                                                <td>{{ product.seller.company_name }}</td>
+                                                <td>${{ product.price }}</td>
+                                                <td>
+                                                    {% if product.stock > 0 %}
+                                                        <span class="badge bg-success">{{ product.stock }}</span>
+                                                    {% else %}
+                                                        <span class="badge bg-danger">Out of stock</span>
+                                                    {% endif %}
+                                                </td>
+                                                <td>
+                                                    <div class="btn-group btn-group-sm">
+                                                        <a href="{% url 'dashboard:product_detail' product.id %}" class="btn btn-outline-primary">
+                                                            <i class="fas fa-eye"></i>
+                                                        </a>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            {% endif %}
                                         {% endfor %}
                                     </tbody>
                                 </table>
                             </div>
-                            {% else %}
+                            {% if not products|dictsort:"is_featured"|last %}
                             <p class="text-center py-3">No featured products found.</p>
                             {% endif %}
-                            {% endwith %}
                         </div>
                         
                         <div class="tab-pane fade" id="out-of-stock" role="tabpanel">
-                            {% with out_of_stock=products|rejectattr:"stock"|selectattr:"stock","equalto",0 %}
-                            {% if out_of_stock %}
                             <div class="table-responsive">
                                 <table class="table table-hover">
                                     <thead>
@@ -158,35 +155,36 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {% for product in out_of_stock %}
-                                        <tr>
-                                            <td>{{ product.name }}</td>
-                                            <td>{{ product.category.name }}</td>
-                                            <td>{{ product.seller.company_name }}</td>
-                                            <td>${{ product.price }}</td>
-                                            <td>
-                                                {% if product.is_featured %}
-                                                    <span class="badge bg-primary">Featured</span>
-                                                {% else %}
-                                                    <span class="badge bg-secondary">No</span>
-                                                {% endif %}
-                                            </td>
-                                            <td>
-                                                <div class="btn-group btn-group-sm">
-                                                    <a href="{% url 'dashboard:product_detail' product.id %}" class="btn btn-outline-primary">
-                                                        <i class="fas fa-eye"></i>
-                                                    </a>
-                                                </div>
-                                            </td>
-                                        </tr>
+                                        {% for product in products %}
+                                            {% if product.stock == 0 %}
+                                            <tr>
+                                                <td>{{ product.name }}</td>
+                                                <td>{{ product.category.name }}</td>
+                                                <td>{{ product.seller.company_name }}</td>
+                                                <td>${{ product.price }}</td>
+                                                <td>
+                                                    {% if product.is_featured %}
+                                                        <span class="badge bg-primary">Featured</span>
+                                                    {% else %}
+                                                        <span class="badge bg-secondary">No</span>
+                                                    {% endif %}
+                                                </td>
+                                                <td>
+                                                    <div class="btn-group btn-group-sm">
+                                                        <a href="{% url 'dashboard:product_detail' product.id %}" class="btn btn-outline-primary">
+                                                            <i class="fas fa-eye"></i>
+                                                        </a>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            {% endif %}
                                         {% endfor %}
                                     </tbody>
                                 </table>
                             </div>
-                            {% else %}
+                            {% if not products|dictsort:"stock"|first %}
                             <p class="text-center py-3">No out of stock products found.</p>
                             {% endif %}
-                            {% endwith %}
                         </div>
                     </div>
                 </div>
