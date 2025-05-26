@@ -366,14 +366,14 @@ def seller_analytics(request):
     
     # Get seller's orders
     from orders.models import OrderItem
-    from django.db.models import Sum, Count
+    from django.db.models import Sum, Count, F
     import datetime
     
-    # Calculate total revenue
+    # Calculate total revenue using price * quantity instead of total_price
     total_revenue = OrderItem.objects.filter(
         product__seller=seller,
         order__status__in=['C', 'S', 'D']  # Only count confirmed, shipped, or delivered orders
-    ).aggregate(total=Sum('total_price'))['total'] or 0
+    ).annotate(item_total=F('price') * F('quantity')).aggregate(total=Sum('item_total'))['total'] or 0
     
     # Calculate weekly revenue (last 7 days)
     one_week_ago = datetime.datetime.now() - datetime.timedelta(days=7)
@@ -381,7 +381,7 @@ def seller_analytics(request):
         product__seller=seller,
         order__status__in=['C', 'S', 'D'],
         order__created_at__gte=one_week_ago
-    ).aggregate(total=Sum('total_price'))['total'] or 0
+    ).annotate(item_total=F('price') * F('quantity')).aggregate(total=Sum('item_total'))['total'] or 0
     
     # Calculate monthly revenue (last 30 days)
     one_month_ago = datetime.datetime.now() - datetime.timedelta(days=30)
@@ -389,7 +389,7 @@ def seller_analytics(request):
         product__seller=seller,
         order__status__in=['C', 'S', 'D'],
         order__created_at__gte=one_month_ago
-    ).aggregate(total=Sum('total_price'))['total'] or 0
+    ).annotate(item_total=F('price') * F('quantity')).aggregate(total=Sum('item_total'))['total'] or 0
     
     # Get top selling products
     top_products = OrderItem.objects.filter(
@@ -397,7 +397,7 @@ def seller_analytics(request):
         order__status__in=['C', 'S', 'D']
     ).values('product__id', 'product__name').annotate(
         total_quantity=Sum('quantity'),
-        total_revenue=Sum('total_price')
+        total_revenue=Sum(F('price') * F('quantity'))
     ).order_by('-total_quantity')[:5]
     
     # Get order status distribution

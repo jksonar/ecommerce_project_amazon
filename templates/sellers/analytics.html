@@ -1,0 +1,227 @@
+{% extends 'base.html' %}
+
+{% block title %}Seller Analytics | Amazon-like{% endblock %}
+
+{% block extra_css %}
+<style>
+    .stat-card {
+        transition: transform 0.3s;
+    }
+    .stat-card:hover {
+        transform: translateY(-5px);
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Chart.js for data visualization -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Order Status Distribution Chart
+        const statusCtx = document.getElementById('orderStatusChart').getContext('2d');
+        const statusLabels = Object.keys({{ status_counts|safe }});
+        const statusData = Object.values({{ status_counts|safe }});
+        
+        new Chart(statusCtx, {
+            type: 'pie',
+            data: {
+                labels: statusLabels,
+                datasets: [{
+                    data: statusData,
+                    backgroundColor: [
+                        '#ffc107', // Pending
+                        '#17a2b8', // Confirmed
+                        '#007bff', // Shipped
+                        '#28a745', // Delivered
+                        '#dc3545'  // Cancelled
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'right',
+                    },
+                    title: {
+                        display: true,
+                        text: 'Order Status Distribution'
+                    }
+                }
+            }
+        });
+        
+        // Top Products Chart
+        const productsCtx = document.getElementById('topProductsChart').getContext('2d');
+        const productLabels = [];
+        const productData = [];
+        
+        {% for product in top_products %}
+            productLabels.push('{{ product.product__name }}');
+            productData.push({{ product.total_quantity }});
+        {% endfor %}
+        
+        new Chart(productsCtx, {
+            type: 'bar',
+            data: {
+                labels: productLabels,
+                datasets: [{
+                    label: 'Units Sold',
+                    data: productData,
+                    backgroundColor: '#007bff',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Quantity Sold'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Product'
+                        }
+                    }
+                },
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Top Selling Products'
+                    }
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <h2 class="mb-4">Seller Dashboard</h2>
+    
+    <div class="row">
+        <div class="col-md-3 mb-4">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Navigation</h5>
+                </div>
+                <div class="list-group list-group-flush">
+                    <a href="{% url 'sellers:dashboard' %}" class="list-group-item list-group-item-action">Dashboard</a>
+                    <a href="{% url 'sellers:products' %}" class="list-group-item list-group-item-action">Products</a>
+                    <a href="{% url 'sellers:orders' %}" class="list-group-item list-group-item-action">Orders</a>
+                    <a href="#" class="list-group-item list-group-item-action">Reviews</a>
+                    <a href="#" class="list-group-item list-group-item-action">Settings</a>
+                    <a href="{% url 'sellers:analytics' %}" class="list-group-item list-group-item-action active">Analytics</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-9">
+            <!-- Revenue Statistics -->
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Revenue Overview</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <div class="card bg-primary text-white stat-card">
+                                <div class="card-body text-center">
+                                    <h6 class="card-title">Total Revenue</h6>
+                                    <h2 class="mb-0">${{ total_revenue }}</h2>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="card bg-success text-white stat-card">
+                                <div class="card-body text-center">
+                                    <h6 class="card-title">Monthly Revenue</h6>
+                                    <h2 class="mb-0">${{ monthly_revenue }}</h2>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="card bg-info text-white stat-card">
+                                <div class="card-body text-center">
+                                    <h6 class="card-title">Weekly Revenue</h6>
+                                    <h2 class="mb-0">${{ weekly_revenue }}</h2>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Charts Row -->
+            <div class="row">
+                <!-- Order Status Distribution -->
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0">Order Status Distribution</h5>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="orderStatusChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Top Products -->
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0">Top Selling Products</h5>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="topProductsChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Top Products Table -->
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Top Products Details</h5>
+                </div>
+                <div class="card-body">
+                    {% if top_products %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Product</th>
+                                    <th>Units Sold</th>
+                                    <th>Revenue</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for product in top_products %}
+                                <tr>
+                                    <td>{{ product.product__name }}</td>
+                                    <td>{{ product.total_quantity }}</td>
+                                    <td>${{ product.total_revenue }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i> No sales data available yet.
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
