@@ -4,6 +4,9 @@ from django.contrib import messages
 from sellers.models import Seller
 from django.core.mail import send_mail
 from django.conf import settings
+from products.models import Product, Category
+from orders.models import Order
+from accounts.models import User
 
 @login_required
 def dashboard_home(request):
