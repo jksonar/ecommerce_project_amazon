@@ -15,10 +15,10 @@
                 <div class="list-group list-group-flush">
                     <a href="{% url 'dashboard:home' %}" class="list-group-item list-group-item-action">Dashboard Home</a>
                     <a href="{% url 'dashboard:manage_sellers' %}" class="list-group-item list-group-item-action active">Sellers</a>
-                    <a href="#" class="list-group-item list-group-item-action">Products</a>
-                    <a href="#" class="list-group-item list-group-item-action">Categories</a>
-                    <a href="#" class="list-group-item list-group-item-action">Orders</a>
-                    <a href="#" class="list-group-item list-group-item-action">Users</a>
+                    <a href="{% url 'dashboard:manage_products' %}" class="list-group-item list-group-item-action">Products</a>
+                    <a href="{% url 'dashboard:manage_categories' %}" class="list-group-item list-group-item-action">Categories</a>
+                    <a href="{% url 'dashboard:manage_orders' %}" class="list-group-item list-group-item-action">Orders</a>
+                    <a href="{% url 'dashboard:manage_users' %}" class="list-group-item list-group-item-action">Users</a>
                 </div>
             </div>
         </div>
@@ -46,154 +46,182 @@
                     
                     <div class="tab-content" id="sellerTabsContent">
                         <div class="tab-pane fade show active" id="pending" role="tabpanel">
-                            {% with pending_sellers=sellers|dictsortreversed:"created_at"|selectattr:"status","equalto":"P" %}
-                            {% if pending_sellers %}
-                            <div class="table-responsive">
-                                <table class="table table-hover">
-                                    <thead>
-                                        <tr>
-                                            <th>Company</th>
-                                            <th>User</th>
-                                            <th>Date Applied</th>
-                                            <th>Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {% for seller in pending_sellers %}
-                                        <tr>
-                                            <td>{{ seller.company_name }}</td>
-                                            <td>{{ seller.user.email }}</td>
-                                            <td>{{ seller.created_at|date:"M d, Y" }}</td>
-                                            <td>
-                                                <div class="btn-group btn-group-sm">
-                                                    <a href="{% url 'dashboard:seller_detail' seller.id %}" class="btn btn-outline-primary">
-                                                        <i class="fas fa-eye"></i>
-                                                    </a>
-                                                    <a href="{% url 'dashboard:approve_seller' seller.id %}" class="btn btn-outline-success">
-                                                        <i class="fas fa-check"></i>
-                                                    </a>
-                                                    <a href="{% url 'dashboard:reject_seller' seller.id %}" class="btn btn-outline-danger">
-                                                        <i class="fas fa-times"></i>
-                                                    </a>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                        {% endfor %}
-                                    </tbody>
-                                </table>
-                            </div>
-                            {% else %}
+                            {% with pending_exists=False %}
+                            {% for seller in sellers %}
+                                {% if seller.status == 'P' %}
+                                    {% if forloop.first %}
+                                    <div class="table-responsive">
+                                        <table class="table table-hover">
+                                            <thead>
+                                                <tr>
+                                                    <th>Company</th>
+                                                    <th>User</th>
+                                                    <th>Date Applied</th>
+                                                    <th>Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                    {% endif %}
+                                    <tr>
+                                        <td>{{ seller.company_name }}</td>
+                                        <td>{{ seller.user.email }}</td>
+                                        <td>{{ seller.created_at|date:"M d, Y" }}</td>
+                                        <td>
+                                            <div class="btn-group btn-group-sm">
+                                                <a href="{% url 'dashboard:seller_detail' seller.id %}" class="btn btn-outline-primary">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                                <a href="{% url 'dashboard:approve_seller' seller.id %}" class="btn btn-outline-success">
+                                                    <i class="fas fa-check"></i>
+                                                </a>
+                                                <a href="{% url 'dashboard:reject_seller' seller.id %}" class="btn btn-outline-danger">
+                                                    <i class="fas fa-times"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% with pending_exists=True %}{% endwith %}
+                                    {% if forloop.last %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    {% endif %}
+                                {% endif %}
+                            {% endfor %}
+                            
+                            {% if not pending_exists %}
                             <p class="text-center py-3">No pending seller applications.</p>
                             {% endif %}
                             {% endwith %}
                         </div>
                         
                         <div class="tab-pane fade" id="approved" role="tabpanel">
-                            {% with approved_sellers=sellers|dictsortreversed:"created_at"|selectattr:"status","equalto":"A" %}
-                            {% if approved_sellers %}
-                            <div class="table-responsive">
-                                <table class="table table-hover">
-                                    <thead>
-                                        <tr>
-                                            <th>Company</th>
-                                            <th>User</th>
-                                            <th>Date Approved</th>
-                                            <th>Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {% for seller in approved_sellers %}
-                                        <tr>
-                                            <td>{{ seller.company_name }}</td>
-                                            <td>{{ seller.user.email }}</td>
-                                            <td>{{ seller.updated_at|date:"M d, Y" }}</td>
-                                            <td>
-                                                <div class="btn-group btn-group-sm">
-                                                    <a href="{% url 'dashboard:seller_detail' seller.id %}" class="btn btn-outline-primary">
-                                                        <i class="fas fa-eye"></i>
-                                                    </a>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                        {% endfor %}
-                                    </tbody>
-                                </table>
-                            </div>
-                            {% else %}
+                            {% with approved_exists=False %}
+                            {% for seller in sellers %}
+                                {% if seller.status == 'A' %}
+                                    {% if forloop.first %}
+                                    <div class="table-responsive">
+                                        <table class="table table-hover">
+                                            <thead>
+                                                <tr>
+                                                    <th>Company</th>
+                                                    <th>User</th>
+                                                    <th>Date Approved</th>
+                                                    <th>Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                    {% endif %}
+                                    <tr>
+                                        <td>{{ seller.company_name }}</td>
+                                        <td>{{ seller.user.email }}</td>
+                                        <td>{{ seller.updated_at|date:"M d, Y" }}</td>
+                                        <td>
+                                            <div class="btn-group btn-group-sm">
+                                                <a href="{% url 'dashboard:seller_detail' seller.id %}" class="btn btn-outline-primary">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% with approved_exists=True %}{% endwith %}
+                                    {% if forloop.last %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    {% endif %}
+                                {% endif %}
+                            {% endfor %}
+                            
+                            {% if not approved_exists %}
                             <p class="text-center py-3">No approved sellers.</p>
                             {% endif %}
                             {% endwith %}
                         </div>
                         
                         <div class="tab-pane fade" id="rejected" role="tabpanel">
-                            {% with rejected_sellers=sellers|dictsortreversed:"created_at"|selectattr:"status","equalto":"R" %}
-                            {% if rejected_sellers %}
-                            <div class="table-responsive">
-                                <table class="table table-hover">
-                                    <thead>
-                                        <tr>
-                                            <th>Company</th>
-                                            <th>User</th>
-                                            <th>Date Rejected</th>
-                                            <th>Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {% for seller in rejected_sellers %}
-                                        <tr>
-                                            <td>{{ seller.company_name }}</td>
-                                            <td>{{ seller.user.email }}</td>
-                                            <td>{{ seller.updated_at|date:"M d, Y" }}</td>
-                                            <td>
-                                                <div class="btn-group btn-group-sm">
-                                                    <a href="{% url 'dashboard:seller_detail' seller.id %}" class="btn btn-outline-primary">
-                                                        <i class="fas fa-eye"></i>
-                                                    </a>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                        {% endfor %}
-                                    </tbody>
-                                </table>
-                            </div>
-                            {% else %}
+                            {% with rejected_exists=False %}
+                            {% for seller in sellers %}
+                                {% if seller.status == 'R' %}
+                                    {% if forloop.first %}
+                                    <div class="table-responsive">
+                                        <table class="table table-hover">
+                                            <thead>
+                                                <tr>
+                                                    <th>Company</th>
+                                                    <th>User</th>
+                                                    <th>Date Rejected</th>
+                                                    <th>Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                    {% endif %}
+                                    <tr>
+                                        <td>{{ seller.company_name }}</td>
+                                        <td>{{ seller.user.email }}</td>
+                                        <td>{{ seller.updated_at|date:"M d, Y" }}</td>
+                                        <td>
+                                            <div class="btn-group btn-group-sm">
+                                                <a href="{% url 'dashboard:seller_detail' seller.id %}" class="btn btn-outline-primary">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% with rejected_exists=True %}{% endwith %}
+                                    {% if forloop.last %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    {% endif %}
+                                {% endif %}
+                            {% endfor %}
+                            
+                            {% if not rejected_exists %}
                             <p class="text-center py-3">No rejected sellers.</p>
                             {% endif %}
                             {% endwith %}
                         </div>
                         
                         <div class="tab-pane fade" id="suspended" role="tabpanel">
-                            {% with suspended_sellers=sellers|dictsortreversed:"created_at"|selectattr:"status","equalto":"S" %}
-                            {% if suspended_sellers %}
-                            <div class="table-responsive">
-                                <table class="table table-hover">
-                                    <thead>
-                                        <tr>
-                                            <th>Company</th>
-                                            <th>User</th>
-                                            <th>Date Suspended</th>
-                                            <th>Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {% for seller in suspended_sellers %}
-                                        <tr>
-                                            <td>{{ seller.company_name }}</td>
-                                            <td>{{ seller.user.email }}</td>
-                                            <td>{{ seller.updated_at|date:"M d, Y" }}</td>
-                                            <td>
-                                                <div class="btn-group btn-group-sm">
-                                                    <a href="{% url 'dashboard:seller_detail' seller.id %}" class="btn btn-outline-primary">
-                                                        <i class="fas fa-eye"></i>
-                                                    </a>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                        {% endfor %}
-                                    </tbody>
-                                </table>
-                            </div>
-                            {% else %}
+                            {% with suspended_exists=False %}
+                            {% for seller in sellers %}
+                                {% if seller.status == 'S' %}
+                                    {% if forloop.first %}
+                                    <div class="table-responsive">
+                                        <table class="table table-hover">
+                                            <thead>
+                                                <tr>
+                                                    <th>Company</th>
+                                                    <th>User</th>
+                                                    <th>Date Suspended</th>
+                                                    <th>Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                    {% endif %}
+                                    <tr>
+                                        <td>{{ seller.company_name }}</td>
+                                        <td>{{ seller.user.email }}</td>
+                                        <td>{{ seller.updated_at|date:"M d, Y" }}</td>
+                                        <td>
+                                            <div class="btn-group btn-group-sm">
+                                                <a href="{% url 'dashboard:seller_detail' seller.id %}" class="btn btn-outline-primary">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% with suspended_exists=True %}{% endwith %}
+                                    {% if forloop.last %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    {% endif %}
+                                {% endif %}
+                            {% endfor %}
+                            
+                            {% if not suspended_exists %}
                             <p class="text-center py-3">No suspended sellers.</p>
                             {% endif %}
                             {% endwith %}
