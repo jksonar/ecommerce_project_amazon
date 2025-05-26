@@ -141,7 +141,6 @@ def manage_users(request):
         return render(request, 'dashboard/access_denied.html')
     
     # Get all users
-    from accounts.models import User
     users = User.objects.all().order_by('-date_joined')
     
     return render(request, 'dashboard/manage_users.html', {'users': users})
@@ -154,10 +153,19 @@ def user_detail(request, user_id):
         return render(request, 'dashboard/access_denied.html')
     
     # Get user
-    from accounts.models import User
     user = get_object_or_404(User, id=user_id)
     
-    return render(request, 'dashboard/user_detail.html', {'user_profile': user})
+    # Get user's orders
+    orders = Order.objects.filter(user=user).order_by('-created_at')
+    
+    # Get user's addresses
+    addresses = Address.objects.filter(user=user)
+    
+    return render(request, 'dashboard/user_detail.html', {
+        'user_detail': user,
+        'orders': orders,
+        'addresses': addresses
+    })
 
 @login_required
 def manage_products(request):
@@ -167,7 +175,6 @@ def manage_products(request):
         return render(request, 'dashboard/access_denied.html')
     
     # Get all products
-    from products.models import Product
     products = Product.objects.all().order_by('-created_at')
     
     return render(request, 'dashboard/manage_products.html', {'products': products})
@@ -180,7 +187,6 @@ def product_detail(request, product_id):
         return render(request, 'dashboard/access_denied.html')
     
     # Get product
-    from products.models import Product
     product = get_object_or_404(Product, id=product_id)
     
     return render(request, 'dashboard/product_detail.html', {'product': product})
@@ -193,15 +199,14 @@ def toggle_product_feature(request, product_id):
         return render(request, 'dashboard/access_denied.html')
     
     # Get product
-    from products.models import Product
     product = get_object_or_404(Product, id=product_id)
     
     # Toggle featured status
-    product.is_featured = not product.is_featured
+    product.featured = not product.featured
     product.save()
     
-    messages.success(request, f'Product "{product.name}" is now {"featured" if product.is_featured else "unfeatured"}.')
-    return redirect('dashboard:manage_products')
+    messages.success(request, f'Product "{product.name}" is now {"featured" if product.featured else "not featured"}.')
+    return redirect('dashboard:product_detail', product_id=product.id)
 
 
 @login_required
@@ -212,7 +217,6 @@ def manage_categories(request):
         return render(request, 'dashboard/access_denied.html')
     
     # Get all categories
-    from products.models import Category
     categories = Category.objects.all().order_by('name')
     
     return render(request, 'dashboard/manage_categories.html', {'categories': categories})
@@ -224,32 +228,43 @@ def add_category(request):
         messages.error(request, 'You do not have permission to access this page.')
         return render(request, 'dashboard/access_denied.html')
     
-    from products.models import Category
-    from django import forms
-    
-    class CategoryForm(forms.ModelForm):
-        class Meta:
-            model = Category
-            fields = ['name', 'parent', 'description']
-            widgets = {
-                'description': forms.Textarea(attrs={'rows': 3}),
-            }
-    
     if request.method == 'POST':
-        form = CategoryForm(request.POST)
-        if form.is_valid():
-            category = form.save(commit=False)
-            # Generate slug from name
-            from django.utils.text import slugify
-            category.slug = slugify(category.name)
-            category.save()
-            messages.success(request, f'Category "{category.name}" has been added.')
-            return redirect('dashboard:manage_categories')
-    else:
-        form = CategoryForm()
+        name = request.POST.get('name')
+        description = request.POST.get('description')
+        parent_id = request.POST.get('parent')
+        
+        if not name:
+            messages.error(request, 'Category name is required.')
+            return redirect('dashboard:add_category')
+        
+        # Create slug from name
+        from django.utils.text import slugify
+        slug = slugify(name)
+        
+        # Check if category with this slug already exists
+        if Category.objects.filter(slug=slug).exists():
+            messages.error(request, f'Category with name "{name}" already exists.')
+            return redirect('dashboard:add_category')
+        
+        # Create category
+        category = Category(name=name, description=description, slug=slug)
+        
+        # Set parent if provided
+        if parent_id:
+            try:
+                parent = Category.objects.get(id=parent_id)
+                category.parent = parent
+            except Category.DoesNotExist:
+                pass
+        
+        category.save()
+        messages.success(request, f'Category "{name}" has been added.')
+        return redirect('dashboard:manage_categories')
     
-    return render(request, 'dashboard/add_category.html', {'form': form})
-
+    # Get all categories for parent selection
+    categories = Category.objects.all().order_by('name')
+    
+    return render(request, 'dashboard/add_category.html', {'categories': categories})
 
 @login_required
 def manage_orders(request):
@@ -259,7 +274,6 @@ def manage_orders(request):
         return render(request, 'dashboard/access_denied.html')
     
     # Get all orders
-    from orders.models import Order
     orders = Order.objects.all().order_by('-created_at')
     
     return render(request, 'dashboard/manage_orders.html', {'orders': orders})
@@ -272,7 +286,12 @@ def order_detail(request, order_id):
         return render(request, 'dashboard/access_denied.html')
     
     # Get order
-    from orders.models import Order
     order = get_object_or_404(Order, id=order_id)
     
-    return render(request, 'dashboard/order_detail.html', {'order': order})
+    # Get order items
+    order_items = order.items.all().select_related('product')
+    
+    return render(request, 'dashboard/order_detail.html', {
+        'order': order,
+        'order_items': order_items
+    })

@@ -15,10 +15,14 @@
                 <div class="list-group list-group-flush">
                     <a href="{% url 'dashboard:home' %}" class="list-group-item list-group-item-action active">Dashboard Home</a>
                     <a href="{% url 'dashboard:manage_sellers' %}" class="list-group-item list-group-item-action">Sellers</a>
-                    <a href="#" class="list-group-item list-group-item-action">Products</a>
+                    <!-- <a href="#" class="list-group-item list-group-item-action">Products</a>
                     <a href="#" class="list-group-item list-group-item-action">Categories</a>
                     <a href="#" class="list-group-item list-group-item-action">Orders</a>
-                    <a href="#" class="list-group-item list-group-item-action">Users</a>
+                    <a href="#" class="list-group-item list-group-item-action">Users</a> -->
+                    <a href="{% url 'dashboard:manage_products' %}" class="list-group-item list-group-item-action">Products</a>
+                    <a href="{% url 'dashboard:manage_categories' %}" class="list-group-item list-group-item-action">Categories</a>
+                    <a href="{% url 'dashboard:manage_orders' %}" class="list-group-item list-group-item-action">Orders</a>
+                    <a href="{% url 'dashboard:manage_users' %}" class="list-group-item list-group-item-action">Users</a>
                 </div>
             </div>
         </div>

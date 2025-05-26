@@ -358,51 +358,71 @@ def seller_analytics(request):
     # Check if seller is approved
     seller = request.user.seller_profile
     if seller.status != 'A':
-        messages.warning(request, 'Your seller account must be approved before you can view analytics.')
+        messages.warning(request, f'Your seller account is currently {seller.get_status_display()}. You cannot access analytics until approved.')
         return redirect('sellers:dashboard')
     
+    # Get seller's products
+    products = seller.products.all()
+    
     # Get seller's orders
-    from orders.models import OrderItem, Order
-    from django.db.models import Count, Sum, F, Q
-    from django.utils import timezone
+    from orders.models import OrderItem
+    from django.db.models import Sum, Count
     import datetime
     
-    # Get date ranges
-    today = timezone.now().date()
-    start_of_week = today - datetime.timedelta(days=today.weekday())
-    start_of_month = today.replace(day=1)
+    # Calculate total revenue
+    total_revenue = OrderItem.objects.filter(
+        product__seller=seller,
+        order__status__in=['C', 'S', 'D']  # Only count confirmed, shipped, or delivered orders
+    ).aggregate(total=Sum('total_price'))['total'] or 0
     
-    # Get order items for this seller
-    order_items = OrderItem.objects.filter(product__seller=seller)
+    # Calculate weekly revenue (last 7 days)
+    one_week_ago = datetime.datetime.now() - datetime.timedelta(days=7)
+    weekly_revenue = OrderItem.objects.filter(
+        product__seller=seller,
+        order__status__in=['C', 'S', 'D'],
+        order__created_at__gte=one_week_ago
+    ).aggregate(total=Sum('total_price'))['total'] or 0
     
-    # Calculate revenue
-    total_revenue = order_items.filter(order__status='D').aggregate(total=Sum(F('price') * F('quantity')))['total'] or 0
+    # Calculate monthly revenue (last 30 days)
+    one_month_ago = datetime.datetime.now() - datetime.timedelta(days=30)
+    monthly_revenue = OrderItem.objects.filter(
+        product__seller=seller,
+        order__status__in=['C', 'S', 'D'],
+        order__created_at__gte=one_month_ago
+    ).aggregate(total=Sum('total_price'))['total'] or 0
     
-    # Revenue by time period
-    weekly_revenue = order_items.filter(
-        order__status='D', 
-        order__created_at__date__gte=start_of_week
-    ).aggregate(total=Sum(F('price') * F('quantity')))['total'] or 0
+    # Get top selling products
+    top_products = OrderItem.objects.filter(
+        product__seller=seller,
+        order__status__in=['C', 'S', 'D']
+    ).values('product__id', 'product__name').annotate(
+        total_quantity=Sum('quantity'),
+        total_revenue=Sum('total_price')
+    ).order_by('-total_quantity')[:5]
     
-    monthly_revenue = order_items.filter(
-        order__status='D', 
-        order__created_at__date__gte=start_of_month
-    ).aggregate(total=Sum(F('price') * F('quantity')))['total'] or 0
+    # Get order status distribution
+    status_distribution = OrderItem.objects.filter(
+        product__seller=seller
+    ).values('order__status').annotate(
+        count=Count('order', distinct=True)
+    )
     
-    # Top selling products
-    top_products = order_items.values(
-        'product__id', 'product__name'
-    ).annotate(
-        total_sold=Sum('quantity'),
-        revenue=Sum(F('price') * F('quantity'))
-    ).order_by('-total_sold')[:5]
+    # Format status distribution for chart
+    status_labels = {
+        'P': 'Pending',
+        'C': 'Confirmed',
+        'S': 'Shipped',
+        'D': 'Delivered',
+        'X': 'Cancelled'
+    }
     
-    context = {
-        'seller': seller,
+    status_counts = {status_labels.get(item['order__status'], 'Unknown'): item['count'] for item in status_distribution}
+    
+    return render(request, 'sellers/analytics.html', {
         'total_revenue': total_revenue,
         'weekly_revenue': weekly_revenue,
         'monthly_revenue': monthly_revenue,
         'top_products': top_products,
-    }
-    
-    return render(request, 'sellers/analytics.html', context)
+        'status_counts': status_counts,
+        'product_count': products.count()
+    })
