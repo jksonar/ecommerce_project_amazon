@@ -1,0 +1,197 @@
+{% extends 'base.html' %}
+
+{% block title %}Manage Products | Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <h2 class="mb-4">Admin Dashboard</h2>
+    
+    <div class="row">
+        <div class="col-md-3 mb-4">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Navigation</h5>
+                </div>
+                <div class="list-group list-group-flush">
+                    <a href="{% url 'dashboard:home' %}" class="list-group-item list-group-item-action">Dashboard Home</a>
+                    <a href="{% url 'dashboard:manage_sellers' %}" class="list-group-item list-group-item-action">Sellers</a>
+                    <a href="{% url 'dashboard:manage_products' %}" class="list-group-item list-group-item-action active">Products</a>
+                    <a href="{% url 'dashboard:manage_categories' %}" class="list-group-item list-group-item-action">Categories</a>
+                    <a href="{% url 'dashboard:manage_orders' %}" class="list-group-item list-group-item-action">Orders</a>
+                    <a href="{% url 'dashboard:manage_users' %}" class="list-group-item list-group-item-action">Users</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-9">
+            <div class="card">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Manage Products</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="nav nav-tabs mb-3" id="productTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="all-tab" data-bs-toggle="tab" data-bs-target="#all" type="button" role="tab">All Products</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="featured-tab" data-bs-toggle="tab" data-bs-target="#featured" type="button" role="tab">Featured</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="out-of-stock-tab" data-bs-toggle="tab" data-bs-target="#out-of-stock" type="button" role="tab">Out of Stock</button>
+                        </li>
+                    </ul>
+                    
+                    <div class="tab-content" id="productTabsContent">
+                        <div class="tab-pane fade show active" id="all" role="tabpanel">
+                            {% if products %}
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>Category</th>
+                                            <th>Seller</th>
+                                            <th>Price</th>
+                                            <th>Stock</th>
+                                            <th>Featured</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for product in products %}
+                                        <tr>
+                                            <td>{{ product.name }}</td>
+                                            <td>{{ product.category.name }}</td>
+                                            <td>{{ product.seller.company_name }}</td>
+                                            <td>${{ product.price }}</td>
+                                            <td>
+                                                {% if product.stock > 0 %}
+                                                    <span class="badge bg-success">{{ product.stock }}</span>
+                                                {% else %}
+                                                    <span class="badge bg-danger">Out of stock</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {% if product.is_featured %}
+                                                    <span class="badge bg-primary">Featured</span>
+                                                {% else %}
+                                                    <span class="badge bg-secondary">No</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <div class="btn-group btn-group-sm">
+                                                    <a href="{% url 'dashboard:product_detail' product.id %}" class="btn btn-outline-primary">
+                                                        <i class="fas fa-eye"></i>
+                                                    </a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            {% else %}
+                            <p class="text-center py-3">No products found.</p>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="tab-pane fade" id="featured" role="tabpanel">
+                            {% with featured_products=products|selectattr:"is_featured" %}
+                            {% if featured_products %}
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>Category</th>
+                                            <th>Seller</th>
+                                            <th>Price</th>
+                                            <th>Stock</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for product in featured_products %}
+                                        <tr>
+                                            <td>{{ product.name }}</td>
+                                            <td>{{ product.category.name }}</td>
+                                            <td>{{ product.seller.company_name }}</td>
+                                            <td>${{ product.price }}</td>
+                                            <td>
+                                                {% if product.stock > 0 %}
+                                                    <span class="badge bg-success">{{ product.stock }}</span>
+                                                {% else %}
+                                                    <span class="badge bg-danger">Out of stock</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <div class="btn-group btn-group-sm">
+                                                    <a href="{% url 'dashboard:product_detail' product.id %}" class="btn btn-outline-primary">
+                                                        <i class="fas fa-eye"></i>
+                                                    </a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            {% else %}
+                            <p class="text-center py-3">No featured products found.</p>
+                            {% endif %}
+                            {% endwith %}
+                        </div>
+                        
+                        <div class="tab-pane fade" id="out-of-stock" role="tabpanel">
+                            {% with out_of_stock=products|rejectattr:"stock"|selectattr:"stock","equalto",0 %}
+                            {% if out_of_stock %}
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>Category</th>
+                                            <th>Seller</th>
+                                            <th>Price</th>
+                                            <th>Featured</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for product in out_of_stock %}
+                                        <tr>
+                                            <td>{{ product.name }}</td>
+                                            <td>{{ product.category.name }}</td>
+                                            <td>{{ product.seller.company_name }}</td>
+                                            <td>${{ product.price }}</td>
+                                            <td>
+                                                {% if product.is_featured %}
+                                                    <span class="badge bg-primary">Featured</span>
+                                                {% else %}
+                                                    <span class="badge bg-secondary">No</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <div class="btn-group btn-group-sm">
+                                                    <a href="{% url 'dashboard:product_detail' product.id %}" class="btn btn-outline-primary">
+                                                        <i class="fas fa-eye"></i>
+                                                    </a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            {% else %}
+                            <p class="text-center py-3">No out of stock products found.</p>
+                            {% endif %}
+                            {% endwith %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

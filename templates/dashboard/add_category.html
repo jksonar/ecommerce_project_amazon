@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+
+{% block title %}Add Category | Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <h2 class="mb-4">Admin Dashboard</h2>
+    
+    <div class="row">
+        <div class="col-md-3 mb-4">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Navigation</h5>
+                </div>
+                <div class="list-group list-group-flush">
+                    <a href="{% url 'dashboard:home' %}" class="list-group-item list-group-item-action">Dashboard Home</a>
+                    <a href="{% url 'dashboard:manage_sellers' %}" class="list-group-item list-group-item-action">Sellers</a>
+                    <a href="{% url 'dashboard:manage_products' %}" class="list-group-item list-group-item-action">Products</a>
+                    <a href="{% url 'dashboard:manage_categories' %}" class="list-group-item list-group-item-action active">Categories</a>
+                    <a href="{% url 'dashboard:manage_orders' %}" class="list-group-item list-group-item-action">Orders</a>
+                    <a href="{% url 'dashboard:manage_users' %}" class="list-group-item list-group-item-action">Users</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-9">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Add New Category</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" action="{% url 'dashboard:add_category' %}">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Category Name</label>
+                            <input type="text" class="form-control" id="name" name="name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Description</label>
+                            <textarea class="form-control" id="description" name="description" rows="3"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="parent" class="form-label">Parent Category (Optional)</label>
+                            <select class="form-select" id="parent" name="parent">
+                                <option value="">None</option>
+                                {% for category in categories %}
+                                <option value="{{ category.id }}">{{ category.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'dashboard:manage_categories' %}" class="btn btn-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-primary">Add Category</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

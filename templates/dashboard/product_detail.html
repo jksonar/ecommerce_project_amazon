@@ -1,0 +1,144 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ product.name }} | Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <h2 class="mb-4">Admin Dashboard</h2>
+    
+    <div class="row">
+        <div class="col-md-3 mb-4">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Navigation</h5>
+                </div>
+                <div class="list-group list-group-flush">
+                    <a href="{% url 'dashboard:home' %}" class="list-group-item list-group-item-action">Dashboard Home</a>
+                    <a href="{% url 'dashboard:manage_sellers' %}" class="list-group-item list-group-item-action">Sellers</a>
+                    <a href="{% url 'dashboard:manage_products' %}" class="list-group-item list-group-item-action active">Products</a>
+                    <a href="{% url 'dashboard:manage_categories' %}" class="list-group-item list-group-item-action">Categories</a>
+                    <a href="{% url 'dashboard:manage_orders' %}" class="list-group-item list-group-item-action">Orders</a>
+                    <a href="{% url 'dashboard:manage_users' %}" class="list-group-item list-group-item-action">Users</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-9">
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Product Details</h5>
+                    <div>
+                        <a href="{% url 'products:product_detail' product.slug %}" class="btn btn-sm btn-light me-2" target="_blank">
+                            <i class="fas fa-external-link-alt"></i> View on Site
+                        </a>
+                        <form method="post" action="{% url 'dashboard:toggle_product_feature' product.id %}" class="d-inline">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm {% if product.is_featured %}btn-warning{% else %}btn-light{% endif %}">
+                                {% if product.is_featured %}
+                                <i class="fas fa-star"></i> Remove from Featured
+                                {% else %}
+                                <i class="far fa-star"></i> Mark as Featured
+                                {% endif %}
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            {% if product.images.exists %}
+                            <img src="{{ product.images.first.image.url }}" class="img-fluid rounded" alt="{{ product.name }}">
+                            {% else %}
+                            <div class="bg-light rounded d-flex align-items-center justify-content-center" style="height: 200px;">
+                                <p class="text-muted">No image available</p>
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-8">
+                            <h4>{{ product.name }}</h4>
+                            <p class="text-muted">{{ product.slug }}</p>
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <p><strong>Category:</strong> {{ product.category.name }}</p>
+                                    <p><strong>Seller:</strong> {{ product.seller.company_name }}</p>
+                                    <p><strong>Price:</strong> ${{ product.price }}</p>
+                                    {% if product.discount_price %}
+                                    <p><strong>Discount Price:</strong> ${{ product.discount_price }}</p>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-6">
+                                    <p>
+                                        <strong>Stock:</strong> 
+                                        {% if product.stock > 0 %}
+                                        <span class="badge bg-success">{{ product.stock }} available</span>
+                                        {% else %}
+                                        <span class="badge bg-danger">Out of stock</span>
+                                        {% endif %}
+                                    </p>
+                                    <p>
+                                        <strong>Status:</strong> 
+                                        {% if product.is_available %}
+                                        <span class="badge bg-success">Available</span>
+                                        {% else %}
+                                        <span class="badge bg-danger">Unavailable</span>
+                                        {% endif %}
+                                    </p>
+                                    <p>
+                                        <strong>Featured:</strong> 
+                                        {% if product.is_featured %}
+                                        <span class="badge bg-primary">Yes</span>
+                                        {% else %}
+                                        <span class="badge bg-secondary">No</span>
+                                        {% endif %}
+                                    </p>
+                                    <p><strong>Created:</strong> {{ product.created_at|date:"M d, Y" }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <h5>Description</h5>
+                        <p>{{ product.description }}</p>
+                    </div>
+                    
+                    {% if product.specifications.exists %}
+                    <div class="mt-4">
+                        <h5>Specifications</h5>
+                        <table class="table table-bordered">
+                            <tbody>
+                                {% for spec in product.specifications.all %}
+                                <tr>
+                                    <th style="width: 30%;">{{ spec.name }}</th>
+                                    <td>{{ spec.value }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% endif %}
+                    
+                    {% if product.images.count > 1 %}
+                    <div class="mt-4">
+                        <h5>Additional Images</h5>
+                        <div class="row">
+                            {% for image in product.images.all %}
+                            {% if not forloop.first %}
+                            <div class="col-md-3 mb-3">
+                                <img src="{{ image.image.url }}" class="img-fluid rounded" alt="{{ product.name }}">
+                            </div>
+                            {% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="card-footer">
+                    <a href="{% url 'dashboard:manage_products' %}" class="btn btn-secondary">Back to Products</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
